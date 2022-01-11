@@ -11,10 +11,13 @@ The solver boasts a *99.28%+* accuracy on the 8636 valid 5-letter words. Feature
 Current dictionary used is the valid [Scrabble dictionary](https://github.com/zeisler/scrabble). 
 
 Solver’s attempt to solve the Jan 10, 2022 wordle for the word `query`:
-⬛🟨⬛⬛🟨
-⬛🟩⬛⬛⬛
-⬛⬛🟨⬛⬛
-🟩🟩🟩🟩🟩
+
+```
+⬛🟨⬛⬛🟨 AROSE
+⬛🟩⬛⬛⬛ TUMID
+⬛⬛🟨⬛⬛ GLYPH
+🟩🟩🟩🟩🟩 QUERY
+```
 <img width="196" alt="Screen Shot 2022-01-12 at 12 26 16 AM" src="https://user-images.githubusercontent.com/1846373/149004246-6f200c36-de13-4bb3-90a6-eb34d27047ce.png">
 
 
