@@ -1,12 +1,21 @@
 # Wordle Solver
 
-The most comprehensive, exhaustive, parameterized command-line *wordle* solver. It boasts a *99.28%+* accuracy on the 8636 valid 5-letter words. Features:
+The most comprehensive, exhaustive, parameterized command-line *wordle* (https://www.powerlanguage.co.uk/wordle/) solver. Wordle is a really popular game made viral by it's inscrutable and quirky emoticon-based game description.
+
+The solver boasts a *99.28%+* accuracy on the 8636 valid 5-letter words. Features:
  - Supports 4 modes: `play`, `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) and `eval` (evaluate the performance)
  - Deterministic
  - Highest accuracy of all solutions evaluated
  - Fully tested
  - Latency `~0.26s` per run
 Current dictionary used is the valid [Scrabble dictionary](https://github.com/zeisler/scrabble). 
+
+Solver’s attempt to solve the Jan 10, 2022 wordle for the word `query`:
+⬛🟨⬛⬛🟨
+⬛🟩⬛⬛⬛
+⬛⬛🟨⬛⬛
+🟩🟩🟩🟩🟩
+<img width="196" alt="Screen Shot 2022-01-12 at 12 26 16 AM" src="https://user-images.githubusercontent.com/1846373/149004246-6f200c36-de13-4bb3-90a6-eb34d27047ce.png">
 
 
 # Algorithm
@@ -18,6 +27,7 @@ With the settings for non-strict play, using positional
  - Repeat 
 
 Failure cases include `jived`, `hides`, `razer`, `zooks`, `jills`, `gibed`, `wises`, `yipes`, `wipes`, `sises`.
+For all these words, there are 2-5 candidate words left at the last guess, and with a random last guess, there is a probability of guessing these too.
 
 # Usage
 
@@ -110,6 +120,16 @@ K=999:	Failed: 10	Accuracy:99.00%
 ### Run Tests
 
 `python -m unittest` runs the entire test suite. 
+
+# Evaluation 
+
+Using a dictionary of scrabble words, there are 172,819 total words and around 5% of them are exactly 5 letters long (8,636). The algorithm devised achieves a *99.28%* success rate at guessing the right word, failing to get the correct the answer for 62 words.
+
+Other settings achieved:
+ - Global character frequency heuristic: Couldn't solve for 133 out of 1000 random samples (86.7% Success rate)
+ - Conditional character frequency heuristic, on candidates left: Couldn't solve for 100 out of 1000 random samples (90.0% Success rate)
+ - Non-strict solution: Couldn't solve for 46 out of 1000 random samples (95.4% Success rate)
+ - Position-aware frequency heuristic + bug fixes: Couldn't solve for 9 out of 1000 random samples (99.1% Success rate)
 
 # Future Work
 
