@@ -2,7 +2,7 @@
 
 The most comprehensive, exhaustive, parameterized command-line *wordle* (https://www.powerlanguage.co.uk/wordle/) solver. Wordle is a really popular game made viral by it's inscrutable and quirky emoticon-based game description.
 
-The solver boasts a *99.28%+* accuracy on the 8636 valid 5-letter words. Features:
+The solver boasts a *99.35%+* accuracy on the 8636 valid 5-letter words. Features:
  - Supports 4 modes: `play`, `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) and `eval` (evaluate the performance)
  - Deterministic
  - Highest accuracy of all solutions evaluated
@@ -29,7 +29,7 @@ With the settings for non-strict play, using positional
  - Find a word from all valid guesses which optimizes sum(P(letter at pos i)) + 0.5 * sum(P letter not at pos i)
  - Repeat 
 
-Failure cases include `jived`, `hides`, `razer`, `zooks`, `jills`, `gibed`, `wises`, `yipes`, `wipes`, `sises`.
+The 56 failure cases are `sakes`, `mooed`, `jived`, `wanes`, `jocks`, `minks`, `wades`, `jaded`, `zoner`, `joker`, `wived`, `jakes`, `mozos`, `goxes`, `vills`, `rover`, `zooks`, `cozes`, `jibes`, `wakes`, `hajes`, `joked`, `sinhs`, `zaxes`, `yaffs`, `hiker`, `bases`, `moved`, `bises`, `zills`, `hided`, `eaved`, `vined`, `surfs`, `jiber`, `gibed`, `dozer`, `fuzed`, `mixed`, `boxed`, `waxes`, `waves`, `vomer`, `egged`, `mazed`, `pests`, `hived`, `socks`, `fazes`, `vests`, `jibed`, `mewed`, `hazes`, `sooks`, `woods`, `sinks`
 For all these words, there are 2-5 candidate words left at the last guess, and with a random last guess, there is a probability of guessing these too.
 
 # Usage
