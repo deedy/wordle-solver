@@ -24,7 +24,7 @@ def main():
                         required=True)
     parser.add_argument('-w',
                         '--word',
-                        help='Word to solve for',
+                        help='Word to solve for in solve mode, or list of comma-separated words for eval',
                         default=None,
                         required=False)
     parser.add_argument('-r',
@@ -37,6 +37,12 @@ def main():
                         type=int,
                         help='Number of candidates to eval when -m eval',
                         default=None,
+                        required=False)
+    parser.add_argument('-d',
+                        '--debug',
+                        action='store_true',
+                        help='Debug mode or not',
+                        default=False,
                         required=False)
     args = parser.parse_args()
     five_words = dictionary.read_words_of_length(N)
@@ -58,14 +64,14 @@ def main():
             word = args.word if args.word else random.choice(five_words)
             print(f'Word [{word.upper()}]')
             w = Wordle(five_words, word)
-            solve_wordle(five_words, w, debug=True)
+            solve_wordle(five_words, w, debug=args.debug)
         except Exception as e:
             print(f'Error: {str(e)}')
     elif args.mode == SOLVE:
         clues = []
         guesses = 0
         while guesses < MAX_GUESSES:
-            chosen, cands, lencands = guess_next_word(five_words, clues)
+            chosen, cands, lencands = guess_next_word(five_words, clues, debug=args.debug)
             if not chosen:
                 print(f'Solved! = {clues[-1][0]}')
                 sys.exit()
@@ -82,26 +88,31 @@ def main():
             clues.append((chosen, feedback_parsed)) 
         print(f'Unsolved!')
     elif args.mode == EVAL:
-        K = args.k
-        if not args.k:
-            K = len(five_words)
-        print(f'Evaluating on {K} words')
-        words = random.sample(five_words, K)
+        if args.word:
+            words = args.word.split(',')
+        else:
+            K = args.k
+            if not args.k:
+                K = len(five_words)
+            print(f'Evaluating on {K} words')
+            words = random.sample(five_words, K)
         fails = []
         start = time()
-        for x in range(K):
-            if x and x % 10 == 0:
-                count = x+1
-                print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Time: {(time() - start)/count:.03f}s')
+        attempt_tot = 0
+        for x in range(len(words)):
+            count = x+1
+            if count and count % 10 == 0:
+                print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
             word = words[x]
             w = Wordle(five_words, word, verbose=False)
-            got_ans, cands = solve_wordle(five_words, w, debug=False)
+            got_ans, attempts, cands = solve_wordle(five_words, w, debug=False)
+            attempt_tot += attempts
             if not got_ans:
                 fails.append((word, len(cands)))
         failed_words = [f[0] for f in fails]
         print(f'Failed on: {failed_words}')
         print(f'Distribution of remaining candidates: {Counter([f[1] for f in fails]).most_common()}')
-        print(f'K={K}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/x)*100:.02f}%')
+        print(f'K={len(words)}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/len(words))*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
 
 
 if __name__ == '__main__':

@@ -40,7 +40,7 @@ def solve_wordle(
 	wordle: Type[Wordle],
 	settings: Dict[str, bool]=DEFAULT_SETTINGS,
 	debug: bool=False
-) -> Tuple[bool, List[str]]:
+) -> Tuple[bool, int, List[str]]:
     clues = []
     for i in range(MAX_GUESSES):
         chosen, cands, numcands = guess_next_word(word_set, clues, settings=settings, debug=debug)
@@ -52,11 +52,11 @@ def solve_wordle(
         if state == Wordle.SOLVED:
             if debug:
                 print(f'Woohoo! Solver solved it in {i+1} guesses!')
-            return True, cands
+            return True, i+1, cands
         elif state == Wordle.UNSOLVED:
             if debug:
                 print('Oh no, it beat the solver :(')
-            return False, cands
+            return False, -1, cands
 
 # Returns a tuple of 
 # - a chosen next guess
@@ -146,6 +146,7 @@ def guess_next_word(
 			score = [0]*26
 			nonpos_score = [0]*26
 			for i, c in enumerate(word):
+				# += does well also but performs worse for duplicate letters
 				score[ord(c)-ord('a')] = conditional_pos_freq[i][c]
 				nonpos_score[ord(c)-ord('a')] = conditional_unknown_freq[c] - conditional_pos_freq[i][c]
 			sortscore = -(sum(score) + NON_POS_WEIGHT * sum(nonpos_score))
@@ -169,19 +170,18 @@ def guess_next_word(
 			score = 0
 			for i, c in enumerate(word):
 				if c in new_musts[i] and len(new_musts[i]) > 1:
-					if c in word_right_place and i in word_right_place[c]:
+					if c in word_right_place:
 						score += 1
-					score += 1
 			return -score
 		explore_cands = sorted(explore_cands, key=boost_letters_in_right_place)
 		max_val2 = boost_letters_in_right_place(explore_cands[0])
 		explore_cands = [x for x in explore_cands if boost_letters_in_right_place(x) == max_val2]
 	
-	# if debug: 
-	# 	print('Inferred conditions ', [''.join(m) for m in new_musts])
-	# 	cond_probs = [(x, y) for x, y in conditional_unknown_freq.items() if y]
-	# 	print(f'Conditional ({len(cond_probs)}):{cond_probs}\nCands ({len(cands)}): {cands[:100]}...\n')
-	# 	print(f'Explore cands ({len(explore_cands)}): {[(c, sortfn(c), boost_letters_in_right_place(c)) for c in explore_cands[:10]]}')
+	if debug: 
+		print('Inferred conditions ', [''.join(m) for m in new_musts])
+		cond_probs = [(x, y) for x, y in conditional_unknown_freq.items() if y]
+		print(f'Conditional ({len(cond_probs)}):{cond_probs}\nCands ({len(cands)}): {cands[:100]}...\n')
+		print(f'Explore cands ({len(explore_cands)}): {[(c, sortfn(c), boost_letters_in_right_place(c)) for c in explore_cands[:10]]}')
 
 	chosen_cs = [cand for cand in explore_cands if cand not in prev_guesses]
 	chosen = chosen_cs[0]	
