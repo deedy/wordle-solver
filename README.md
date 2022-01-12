@@ -183,6 +183,7 @@ The solver's solution to [Evil Wordle](https://swag.github.io/evil-wordle/) is i
 <img width="248" alt="Screen Shot 2022-01-12 at 5 33 09 PM" src="https://user-images.githubusercontent.com/1846373/149136925-39e5c80f-9a5a-479b-a807-de654cabc432.png">
 
 For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solution. 
+
 <img width="283" alt="Screen Shot 2022-01-12 at 5 42 19 PM" src="https://user-images.githubusercontent.com/1846373/149138177-cd044202-6cd4-4dcd-a203-d8c5f1052a8e.png">
 
 
