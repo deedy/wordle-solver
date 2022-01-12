@@ -6,8 +6,11 @@ The solver boasts a *99.35%+* accuracy on the 8636 valid 5-letter words. Feature
  - Supports 4 modes: `play`, `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) and `eval` (evaluate the performance)
  - Deterministic
  - Highest accuracy of all solutions evaluated
+ - Support custom dictionaries with `--dict_file`
+ - Support custom length wordles with `-N` and custom max guesses with `--guesses`.
+ - Supports "hard mode" where each guess must conform to previous hints with `--hard`.
  - Fully tested
- - Latency `~0.26s` per run
+ - Latency `~0.26s` per run on default ~9000 word dict and all 5 letter words.
 Current dictionary used is the valid [Scrabble dictionary](https://github.com/zeisler/scrabble). 
 
 Solver’s attempt to solve the Jan 10, 2022 wordle for the word `query`:
@@ -123,6 +126,30 @@ K=999:	Failed: 10	Accuracy:99.00%
 ### Run Tests
 
 `python -m unittest` runs the entire test suite. 
+
+# Advanced Usage
+
+### Custom settings
+
+Here are things you can customize with each run:
+
+ - `-d` Specify a debug level. `2` gives the most details, and `1`, the default if this flag is specified gives certain details like the length of the candidate set and what the previous clues tell us. 
+ - `-N` Specify the length of the words in the wordle you want to play. Default is `5`. 
+ - `--guesses` Specify the number of valid guesses. Default is `6`.
+ - `-hard` Whether or not to play on "hard mode" where each subsequent guess must adhere to the previous clues. 
+ - `--dict_file` The word set you want to use. Details below. 
+
+### Specifying a dict file 
+
+Results of the evaluation and performance of the eval depend greatly on the choice of dict file used. Here are some options provided by default. You can specify it (or add your own) with `--dict_file`
+
+ - `data/dictionary_proper.txt`: 8636 5-letter words. A valid Scrabble dictionary, and the default choice. Source: https://github.com/zeisler/scrabble
+ - `data/words_alpha.txt`: 15918 5-letter words. Contains strange words like `chivw`. Source: https://github.com/dwyl/english-words
+ - `data/unix_words.txt`: 8497 lowercase 5-letter words. Source: Default `/usr/share/dict/words` on Mac machines.
+ - `'data/lexicon_4958.txt`: 4958 5-letter words. Source: @dsivakumar's https://github.com/aravinho/wordle_public/blob/main/wordle/lexicons/lexicon_4958. Explanation on how this is derived is in the repo.
+ - `data/sgb-words.txt`: 5757 5-letter words. The list of 5-letter words from Knuth's Stanford Graph Base. Source: https://www-cs-faculty.stanford.edu/~knuth/sgb-words.txt
+
+The official Wordle game uses a large lexicon for valid guess words, but a smaller subset for valid magic words. We ignore this assumption and assume any valid word can be guessed. 
 
 # Evaluation 
 

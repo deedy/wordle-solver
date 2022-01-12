@@ -136,6 +136,8 @@ def main():
     N = args.N
     try:
         word_set = read_words_of_length(N, fname=args.dict_file)
+        if args.debug >= 1:
+            print(f'Read {len(word_set)} valid lower case words from [{args.dict_file}]')
     except Exception as e:
         print(f'Error: {str(e)}')
         sys.exit()
