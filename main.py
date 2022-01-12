@@ -1,9 +1,8 @@
 from collections import Counter
-from dictionary import dictionary
 from game.wordle import Wordle
-from game.constants import DEFAULT_N, DEFAULT_MAX_GUESSES, DEFAULT_GAME_CONFIG, DEFAULT_SOLVER_SETTINGS
+from game.constants import DEFAULT_N, DEFAULT_MAX_GUESSES, DEFAULT_GAME_CONFIG, DEFAULT_SOLVER_SETTINGS, DEFAULT_DICT
 from game.solver.solver import guess_next_word, solve_wordle
-from game.util import get_n_from_word_set
+from game.util import get_n_from_word_set, read_words_of_length
 import argparse
 import random
 import sys
@@ -28,7 +27,7 @@ def play(word_set: List[str], game_config: Dict[str, str]):
         except Exception as e:
             print(f'Error: {str(e)}')
 
-def show(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug=False):
+def show(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
     for word in words:
         try:
             print(f'Word [{word.upper()}]')
@@ -38,7 +37,7 @@ def show(word_set: List[str], words: List[str], game_config: Dict[str, str], sol
             print(f'Error: {str(e)}')
         print('\n\n')
 
-def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug=False):
+def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
     N = get_n_from_word_set(word_set)
     clues = []
     guesses = 0
@@ -60,7 +59,7 @@ def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dic
         clues.append((chosen, feedback_parsed)) 
     print(f'Unsolved!')
 
-def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str]):
+def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
     print(f'Evaluating on {len(words)} words. Total available words: {len(word_set)}')
     fails = []
     start = time()
@@ -70,8 +69,8 @@ def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], sol
         if count and count % 10 == 0:
             print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
         word = words[x]
-        w = Wordle(word_set, word, config=game_config, verbose=False)
-        got_ans, attempts, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=False)
+        w = Wordle(word_set, word, config=game_config, verbose=debug >= 2)
+        got_ans, attempts, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
         attempt_tot += attempts
         if not got_ans:
             fails.append((word, len(cands)))
@@ -106,9 +105,11 @@ def main():
                         required=False)
     parser.add_argument('-d',
                         '--debug',
-                        action='store_true',
+                        type=int,
                         help='Debug mode or not',
-                        default=False,
+                        default=0,
+                        nargs='?',
+                        const=1,
                         required=False)
     parser.add_argument('-N',
                         type=int,
@@ -120,13 +121,29 @@ def main():
                         help='Value of MAX_GUESSES',
                         default=DEFAULT_MAX_GUESSES,
                         required=False)
+    parser.add_argument('-hard',
+                        '--hard_mode',
+                        action='store_true',
+                        help='Wordle in "hard mode" or not which requires all guesses to conform to the previous clues.',
+                        default=False,
+                        required=False)
+    parser.add_argument('--dict_file',
+                        type=str,
+                        help='Dictionary file to read from',
+                        default=DEFAULT_DICT,
+                        required=False)
     args = parser.parse_args()
     N = args.N
-    word_set = dictionary.read_words_of_length(N)
+    try:
+        word_set = read_words_of_length(N, fname=args.dict_file)
+    except Exception as e:
+        print(f'Error: {str(e)}')
+        sys.exit()
     game_config = DEFAULT_GAME_CONFIG
     game_config['max_guesses'] = str(args.guesses)
     solver_settings = DEFAULT_SOLVER_SETTINGS
     solver_settings['max_guesses'] = str(args.guesses)
+    solver_settings['non_strict'] = not args.hard_mode
     if args.mode == PLAY:
         play(word_set, game_config=game_config)
     elif args.mode == SHOW:

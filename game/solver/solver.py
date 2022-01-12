@@ -37,23 +37,23 @@ def solve_wordle(
 	word_set: List[str],
 	wordle: Type[Wordle],
 	solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
-	debug: bool=False
+	debug: int=1
 ) -> Tuple[bool, int, List[str]]:
     clues = []
     MAX_GUESSES = int(solver_settings['max_guesses'])
     for i in range(MAX_GUESSES):
         chosen, cands, numcands = guess_next_word(word_set, clues, solver_settings=solver_settings, debug=debug)
-        if debug:
+        if debug >= 1:
             print(f'Choosing [{chosen}]. Total {numcands} candidates: {cands}...')
         clue, state = wordle.guess(chosen)
         if clue:
             clues.append((chosen, clue))
         if state == Wordle.SOLVED:
-            if debug:
+            if debug >= 1:
                 print(f'Woohoo! Solver solved it in {i+1} guesses!')
             return True, i+1, cands
         elif state == Wordle.UNSOLVED:
-            if debug:
+            if debug >= 1:
                 print('Oh no, it beat the solver :(')
             return False, -1, cands
 
@@ -66,7 +66,7 @@ def guess_next_word(
 	word_set: List[str],
 	clues: List[Tuple[str, List[int]]],
 	solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
-	debug=False
+	debug: int=1
 ) -> Tuple[str, List[str], int]:
 	N = get_n_from_word_set(word_set)
 	MAX_GUESSES = int(solver_settings['max_guesses'])
@@ -77,23 +77,6 @@ def guess_next_word(
 
 	cands = [w for w in word_set \
 			if not w in prev_guesses and is_guessable_word(w, word_right_place, in_word_wrong_place, not_in_word)]
-			
-	char_freq_heuristic = defaultdict(int)
-	if not solver_settings['non_strict']:
-		# TODO(deedy): Support use_pos when non_strict
-		char_distribution_words = word_set
-		if solver_settings['use_conditional']:
-			# Heuristic should be conditional on what is left!
-			char_distribution_words = cands
-		char_dist = Counter([l for c in char_distribution_words for l in c]).most_common()
-		char_dist_freq = {let: freq for let, freq in char_dist}
-		def sortfn(word):
-			# Distinct letters num times appear
-			return -sum([char_dist_freq[c] for c in set(word)])
-		sortcands = sorted(cands, key=sortfn)
-		chosen = sortcands[0]
-		return chosen, sortcands, len(sortcands)
-	
 	
 	
 	guess_left = MAX_GUESSES - len(clues)
@@ -158,7 +141,8 @@ def guess_next_word(
 					[(chr(i+ ord('a')), v) for i, v in enumerate(nonpos_score) if v], sortscore)
 		sortfn = sort_maximal_position_with_nonpos
 	
-	explore_cands = sorted(word_set, key=sortfn)
+	explorable = word_set if solver_settings['non_strict'] else cands
+	explore_cands = sorted(explorable, key=sortfn)
 	max_val = sortfn(explore_cands[0])
 	explore_cands = [x for x in explore_cands if sortfn(x) == max_val]
 	
@@ -179,7 +163,7 @@ def guess_next_word(
 		max_val2 = boost_letters_in_right_place(explore_cands[0])
 		explore_cands = [x for x in explore_cands if boost_letters_in_right_place(x) == max_val2]
 	
-	if debug: 
+	if debug >= 2:
 		print('Inferred conditions ', [''.join(m) for m in new_musts])
 		cond_probs = [(x, y) for x, y in conditional_unknown_freq.items() if y]
 		print(f'Conditional ({len(cond_probs)}):{cond_probs}\nCands ({len(cands)}): {cands[:100]}...\n')
