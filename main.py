@@ -42,7 +42,11 @@ def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dic
     clues = []
     guesses = 0
     while guesses < int(game_config['max_guesses']):
-        chosen, cands, lencands = guess_next_word(word_set, clues, solver_settings=solver_settings, debug=debug)
+        try:
+            chosen, cands, lencands = guess_next_word(word_set, clues, solver_settings=solver_settings, debug=debug)
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            sys.exit()
         if not chosen:
             print(f'Solved! = {clues[-1][0]}')
             sys.exit()
@@ -120,13 +124,18 @@ def main():
     parser.add_argument('--guesses',
                         type=int,
                         help='Value of MAX_GUESSES',
-                        default=DEFAULT_MAX_GUESSES,
+                        default=DEFAULT_SOLVER_SETTINGS['max_guesses'],
                         required=False)
     parser.add_argument('-hard',
                         '--hard_mode',
                         action='store_true',
                         help='Wordle in "hard mode" or not which requires all guesses to conform to the previous clues.',
                         default=False,
+                        required=False)
+    parser.add_argument('--non_pos_weight',
+                        type=float,
+                        help='When picking a best guess, how much to weigh non positional weights vs exact position',
+                        default=DEFAULT_SOLVER_SETTINGS['non_pos_weight'],
                         required=False)
     parser.add_argument('--dict_file',
                         type=str,
@@ -147,6 +156,7 @@ def main():
     solver_settings = DEFAULT_SOLVER_SETTINGS
     solver_settings['max_guesses'] = str(args.guesses)
     solver_settings['non_strict'] = not args.hard_mode
+    solver_settings['non_pos_weight'] = str(args.non_pos_weight)
     if args.mode == PLAY:
         play(word_set, game_config=game_config)
     elif args.mode == SHOW:

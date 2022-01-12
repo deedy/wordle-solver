@@ -1,6 +1,6 @@
 from typing import List, Dict, Set, Tuple, Type
 from collections import defaultdict, Counter
-from ..constants import DEFAULT_MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_SOLVER_SETTINGS
+from ..constants import NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_SOLVER_SETTINGS
 from ..wordle import Wordle
 from .util import is_guessable_word
 from ..util import get_n_from_word_set
@@ -61,7 +61,6 @@ def solve_wordle(
 # - a chosen next guess
 # - a list of possible candidate words left to solve the wordle
 # - the number of possible candidate words left
-NON_POS_WEIGHT = 0.5
 def guess_next_word(
 	word_set: List[str],
 	clues: List[Tuple[str, List[int]]],
@@ -70,6 +69,7 @@ def guess_next_word(
 ) -> Tuple[str, List[str], int]:
 	N = get_n_from_word_set(word_set)
 	MAX_GUESSES = int(solver_settings['max_guesses'])
+	NON_POS_WEIGHT = float(solver_settings['non_pos_weight'])
 	word_right_place, in_word_wrong_place, not_in_word = parse_clues(clues, debug=debug)
 	prev_guesses = set([w for w, _ in clues])
 	# Check if the last clue was fully correct
@@ -117,8 +117,7 @@ def guess_next_word(
 			total_unknown_freq += 1
 
 	if total_unknown_freq == 0:
-		# Does this happen? 
-		import pdb; pdb.set_trace()
+		raise Exception(f'No frequency distribution could be attained from remaining {len(cands)} candidates. This should never happen.')
 	if not solver_settings['use_pos']:
 		def sort_maximal_nonpos(word):
 			# Sort by the number of times a character in a word appears
@@ -144,11 +143,12 @@ def guess_next_word(
 		sortfn = sort_maximal_position_with_nonpos
 	
 	explorable = word_set if solver_settings['non_strict'] else cands
-	explore_cands = sorted(explorable, key=sortfn)
-	max_val = sortfn(explore_cands[0])
-	explore_cands = [x for x in explore_cands if sortfn(x) == max_val]
+	explorable = [cand for cand in explorable if cand not in prev_guesses]
+	explorable.sort(key=sortfn)
+	max_val = sortfn(explorable[0])
+	explorable = [x for x in explorable if sortfn(x) == max_val]
 	
-	if len(explore_cands) > 0:
+	if len(explorable) > 0:
 		# Break ties by boosting words with known letter guesses because
 		# they can appear in the word again and need to be explicitly checked for
 		# because simply guessing them in the wrong place will always return 🟨 
@@ -161,17 +161,18 @@ def guess_next_word(
 					if c in word_right_place:
 						score += 1
 			return -score
-		explore_cands = sorted(explore_cands, key=boost_letters_in_right_place)
-		max_val2 = boost_letters_in_right_place(explore_cands[0])
-		explore_cands = [x for x in explore_cands if boost_letters_in_right_place(x) == max_val2]
+		explorable.sort(key=boost_letters_in_right_place)
+		max_val2 = boost_letters_in_right_place(explorable[0])
+		explorable = [x for x in explorable if boost_letters_in_right_place(x) == max_val2]
 	
 	if debug >= 2:
 		print('Inferred conditions ', [''.join(m) for m in new_musts])
 		cond_probs = [(x, y) for x, y in conditional_unknown_freq.items() if y]
 		print(f'Conditional ({len(cond_probs)}):{cond_probs}\nCands ({len(cands)}): {cands[:100]}...\n')
-		print(f'Explore cands ({len(explore_cands)}): {[(c, sortfn(c), boost_letters_in_right_place(c)) for c in explore_cands[:10]]}')
+		print(f'Explore cands ({len(explorable)}): {[(c, sortfn(c), boost_letters_in_right_place(c)) for c in explorable[:10]]}')
 
-	chosen_cs = [cand for cand in explore_cands if cand not in prev_guesses]
-	chosen = chosen_cs[0]	
+	if not len(explorable):
+		raise Exception(f'No more explorable candidates. This should never happen.')
+	chosen = explorable[0]	
 	return chosen, cands[:5], len(cands)
 	 

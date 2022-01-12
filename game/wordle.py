@@ -1,5 +1,5 @@
 from typing import Dict, List, Tuple
-from .constants import DEFAULT_MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_GAME_CONFIG
+from .constants import NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_GAME_CONFIG
 from .util import get_n_from_word_set
 
 class Wordle:
@@ -16,7 +16,7 @@ class Wordle:
     def __init__(self, word_set: List[str], word: str, config: Dict[str, str] = DEFAULT_GAME_CONFIG,verbose=True):
         self.N = get_n_from_word_set(word_set)
         self.MAX_GUESSES = int(config['max_guesses'])
-        self.all_words = word_set
+        self.all_words = set(word_set)
         self.check_word(word)
         self._word = word.lower()
         self.guesses = []

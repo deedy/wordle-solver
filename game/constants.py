@@ -19,7 +19,8 @@ DEFAULT_SOLVER_SETTINGS = {
 	# Use positional character distribution instead of global character distribution amongst the 
 	# remaining word candidates.
 	'use_pos': True,
-	'max_guesses': str(DEFAULT_MAX_GUESSES)
+	'max_guesses': str(DEFAULT_MAX_GUESSES),
+	'non_pos_weight': str(0.5),
 }
 
 # tile
