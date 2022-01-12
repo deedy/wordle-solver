@@ -191,3 +191,7 @@ For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solut
 
  - Support passing in more solver settings through command line, including the weight of `NON_POS_WEIGHT`
  - Support a separate guess set and valid word set
+ - This solution does pretty well and generalizes to various dictionaries, but the optimal solution is to fully generate the mini-max tree for a given dictionary:
+   - Demo: http://www.npinsker.me/puzzles/wordle/
+   - Code (Rust): https://gist.github.com/npinsker/a495784b9c6eacfe481d8e38963b335c
+   - Tweet: https://twitter.com/npinsker/status/1478981155529519104
