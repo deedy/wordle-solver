@@ -71,7 +71,8 @@ def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], sol
         word = words[x]
         w = Wordle(word_set, word, config=game_config, verbose=debug >= 2)
         got_ans, attempts, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
-        attempt_tot += attempts
+        if attempts > 0:
+            attempt_tot += attempts
         if not got_ans:
             fails.append((word, len(cands)))
     failed_words = [f[0] for f in fails]

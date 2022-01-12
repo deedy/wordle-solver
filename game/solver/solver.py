@@ -72,13 +72,15 @@ def guess_next_word(
 	MAX_GUESSES = int(solver_settings['max_guesses'])
 	word_right_place, in_word_wrong_place, not_in_word = parse_clues(clues, debug=debug)
 	prev_guesses = set([w for w, _ in clues])
-	if len(clues) and clues[-1][1] == [GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT]:
+	# Check if the last clue was fully correct
+	if len(clues) and len(clues[-1][1]) and len(set(clues[-1][1])) == 1 and clues[-1][1][0] == GUESS_RIGHT_SPOT:
 		return None, [], 0
 
 	cands = [w for w in word_set \
 			if not w in prev_guesses and is_guessable_word(w, word_right_place, in_word_wrong_place, not_in_word)]
 	
-	
+	if not len(cands):
+		raise Exception('No candidates left! Its possible you\'re not using an accurate dictionary!')
 	guess_left = MAX_GUESSES - len(clues)
 	# len(cands) <= guess_left (this condition guarantees brute force solving, but takes more attempts)
 	if len(cands) == 1 or guess_left == 1: 
