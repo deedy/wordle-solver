@@ -153,13 +153,15 @@ The official Wordle game uses a large lexicon for valid guess words, but a small
 
 # Evaluation 
 
-Using a dictionary of scrabble words, there are 172,819 total words and around 5% of them are exactly 5 letters long (8,636). The algorithm devised achieves a *99.28%* success rate at guessing the right word, failing to get the correct the answer for 62 words.
+Using a dictionary of scrabble words, there are 172,819 total words and around 5% of them are exactly 5 letters long (8,636). The algorithm devised achieves a *99.35%* success rate at guessing the right word, failing to get the correct the answer for 56 words.
 
 Other settings achieved:
  - Global character frequency heuristic: Couldn't solve for 133 out of 1000 random samples (86.7% Success rate)
  - Conditional character frequency heuristic, on candidates left: Couldn't solve for 100 out of 1000 random samples (90.0% Success rate)
  - Non-strict solution: Couldn't solve for 46 out of 1000 random samples (95.4% Success rate)
  - Position-aware frequency heuristic + bug fixes: Couldn't solve for 9 out of 1000 random samples (99.1% Success rate)
+
+### Different Word Lengths
 
 Using other values of `N` with `MAX_GUESSES=6`, with the optimal solver:
  - N=2 (96 words) `K=96:	Failed: 32	Accuracy:66.67%	Avg Attempts: 2.67	Avg Time: 0.002s`
@@ -173,6 +175,13 @@ Using other values of `N` with `MAX_GUESSES=6`, with the optimal solver:
  - N=10 (20300 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 2.86	Avg Time: 0.643s`
  - N=11 (15504 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 2.64	Avg Time: 0.468s`
  - N=12 (11357 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 2.45	Avg Time: 0.327s`
+
+### Evil Wordle
+
+The solver's solution to [Evil Wordle](https://swag.github.io/evil-wordle/) is in 5 tries. I believe the minimum you can go is a 4-ply solution, but it's not necessary that the best Evil Wordle solver is the most accurate Wordle solver. 
+
+<img width="248" alt="Screen Shot 2022-01-12 at 5 33 09 PM" src="https://user-images.githubusercontent.com/1846373/149136925-39e5c80f-9a5a-479b-a807-de654cabc432.png">
+
 
 # Future Work
 
