@@ -134,6 +134,19 @@ Other settings achieved:
  - Non-strict solution: Couldn't solve for 46 out of 1000 random samples (95.4% Success rate)
  - Position-aware frequency heuristic + bug fixes: Couldn't solve for 9 out of 1000 random samples (99.1% Success rate)
 
+Using other values of `N` with `MAX_GUESSES=6`, with the optimal solver:
+ - N=2 (96 words) `K=96:	Failed: 32	Accuracy:66.67%	Avg Attempts: 2.67	Avg Time: 0.002s`
+ - N=3 (972 words) `K=100:	Failed: 23	Accuracy:77.00%	Avg Attempts: 3.69	Avg Time: 0.030s`
+ - N=4 (3903 words) `K=100:	Failed: 5	Accuracy:95.00%	Avg Attempts: 4.46	Avg Time: 0.116s`
+ - N=5 (8636 words) `K=100:	Failed: 1	Accuracy:99.00%	Avg Attempts: 4.13	Avg Time: 0.241s`
+ - N=6 (15232 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 3.83	Avg Time: 0.471s`
+ - N=7 (23109 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 3.58	Avg Time: 0.678s`
+ - N=8 (28420 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 3.25	Avg Time: 0.819s`
+ - N=9 (24873 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 3.00	Avg Time: 0.728s`
+ - N=10 (20300 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 2.86	Avg Time: 0.643s`
+ - N=11 (15504 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 2.64	Avg Time: 0.468s`
+ - N=12 (11357 words) `K=100:	Failed: 0	Accuracy:100.00%	Avg Attempts: 2.45	Avg Time: 0.327s`
+
 # Future Work
 
  - Support passing in solver settings through command line, including the weight of `NON_POS_WEIGHT`
