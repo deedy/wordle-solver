@@ -1,4 +1,6 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Tuple
+from collections import defaultdict
+from ..constants import NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
 
 def indexall(w: str, let: str) -> Set[int]:
     ix = set()
@@ -6,6 +8,34 @@ def indexall(w: str, let: str) -> Set[int]:
         if w[i] == let:
             ix.add(i)
     return ix
+
+def parse_clues(clues: List[Tuple[str, List[int]]], debug=False) -> Tuple[Dict[str, Set[int]], Dict[str, Set[int]], Set[str]]:
+    if not len(clues):
+        return {}, {}, set()
+    N = len(clues[0][0])
+    not_in_word = set()
+    in_word_wrong_place = defaultdict(set)
+    word_right_place = defaultdict(set)
+    for w, clue_res in clues:
+        for i in range(len(clue_res)):
+            if clue_res[i] == NOTHING:
+                not_in_word.add(w[i])
+            elif clue_res[i] == GUESS_WRONG_SPOT:
+                in_word_wrong_place[w[i]].add(i)
+            elif clue_res[i] == GUESS_RIGHT_SPOT:
+                word_right_place[w[i]].add(i)
+            else:
+                assert False
+    if debug:
+        fword = ['_'] * N
+        for c, ixes in word_right_place.items():
+            for ix in ixes:
+                fword[ix] = c
+        word_format = ''.join(fword)
+        wrong_place = [(x, y) for x, y in in_word_wrong_place.items()]
+        not_word = ''.join(not_in_word)
+        print(f'Right: [{word_format}] Wrong: {wrong_place} Absent: [{not_word}]')
+    return word_right_place, in_word_wrong_place, not_in_word
 
 def is_guessable_word(
         w: str,
