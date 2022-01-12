@@ -3,6 +3,12 @@ from game.wordle import Wordle
 
 class TestWordle(unittest.TestCase):
 
+	def test_invalid_word_list(self):
+		with self.assertRaises(Exception) as context:
+			w = Wordle(['gorge', 'gorges'], 'gorge')
+		with self.assertRaises(Exception) as context:
+			w = Wordle([], 'gorge')
+
 	def test_solved(self):
 		w = Wordle(['gorge'], 'gorge')
 		clue, state = w.guess('gorge')

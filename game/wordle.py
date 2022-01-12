@@ -1,5 +1,6 @@
 from typing import List, Tuple
-from .constants import N, MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
+from .constants import MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
+from .util import get_n_from_word_set
 
 class Wordle:
     EMOJI_MAP = {
@@ -12,8 +13,9 @@ class Wordle:
     SOLVED = 1
     UNSOLVED = 2
     
-    def __init__(self, five_words: List[str], word: str, verbose=True):
-        self.all_words = five_words
+    def __init__(self, word_set: List[str], word: str, verbose=True):
+        self.N = get_n_from_word_set(word_set)
+        self.all_words = word_set
         self.check_word(word)
         self._word = word.lower()
         self.guesses = []
@@ -29,8 +31,8 @@ class Wordle:
         return ''.join(pclue)
 
     def check_word(self, guess):
-        if len(guess) != N:
-            raise Exception(f'[{guess}] needs to be {N} letters')
+        if len(guess) != self.N:
+            raise Exception(f'[{guess}] needs to be {self.N} letters')
         if not guess in self.all_words:
             raise Exception(f'[{guess}] is not a valid word!')
 
@@ -48,7 +50,7 @@ class Wordle:
         guess = guess.lower()
         self.check_word(guess)
         self.guesses.append(guess)
-        clue = [NOTHING] * N
+        clue = [NOTHING] * self.N
         for i, g in enumerate(guess):
             if self._word[i] == g:
                 clue[i] = GUESS_RIGHT_SPOT
@@ -58,13 +60,13 @@ class Wordle:
             print(guess.upper())
             print(Wordle.emojify(clue))
             
-        if len([1 for c in clue if c == GUESS_RIGHT_SPOT]) == N:
+        if len([1 for c in clue if c == GUESS_RIGHT_SPOT]) == self.N:
             if self.verbose:
-                print(f'Solved! - {guess}')
+                print(f'Solved! - [{guess}]')
             self.state = Wordle.SOLVED
         elif len(self.guesses) >= MAX_GUESSES:
             if self.verbose:
-                print(f'Lost! - {self.guesses}')
+                print(f'Lost! Word was [{self._word}] - {self.guesses}')
             self.state = Wordle.UNSOLVED
         
         return clue, self.state

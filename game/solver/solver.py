@@ -1,8 +1,9 @@
 from typing import List, Dict, Set, Tuple, Type
 from collections import defaultdict, Counter
-from ..constants import N, MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
+from ..constants import MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
 from ..wordle import Wordle
 from .util import is_guessable_word
+from ..util import get_n_from_word_set
 	
 DEFAULT_SETTINGS = {
 	'use_conditional': True,
@@ -10,7 +11,10 @@ DEFAULT_SETTINGS = {
 	'use_pos': True,
 }
 
-def parse_clues(clues: List[Tuple[str, List[int]]], debug=False):
+def parse_clues(clues: List[Tuple[str, List[int]]], debug=False) -> Tuple[Dict[str, Set[int]], Dict[str, Set[int]], Set[str]]:
+	if not len(clues):
+		return {}, {}, set()
+	N = len(clues[0][0])
 	not_in_word = set()
 	in_word_wrong_place = defaultdict(set)
 	word_right_place = defaultdict(set)
@@ -69,6 +73,7 @@ def guess_next_word(
 	settings: Dict[str, bool]=DEFAULT_SETTINGS,
 	debug=False
 ) -> Tuple[str, List[str], int]:
+	N = get_n_from_word_set(word_set)
 	word_right_place, in_word_wrong_place, not_in_word = parse_clues(clues, debug=debug)
 	prev_guesses = set([w for w, _ in clues])
 	if len(clues) and clues[-1][1] == [GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT]:
@@ -96,7 +101,8 @@ def guess_next_word(
 	
 	
 	guess_left = MAX_GUESSES - len(clues)
-	if len(cands) <= guess_left or guess_left == 1:
+	# len(cands) <= guess_left (this condition guarantees brute force solving, but takes more attempts)
+	if len(cands) == 1 or guess_left == 1: 
 		# We can just guess them all individually or don't have enough guesses left
 		return cands[0], cands, len(cands)
 
