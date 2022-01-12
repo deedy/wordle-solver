@@ -1,5 +1,5 @@
-from typing import List, Tuple
-from .constants import MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
+from typing import Dict, List, Tuple
+from .constants import DEFAULT_MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_GAME_CONFIG
 from .util import get_n_from_word_set
 
 class Wordle:
@@ -13,8 +13,9 @@ class Wordle:
     SOLVED = 1
     UNSOLVED = 2
     
-    def __init__(self, word_set: List[str], word: str, verbose=True):
+    def __init__(self, word_set: List[str], word: str, config: Dict[str, str] = DEFAULT_GAME_CONFIG,verbose=True):
         self.N = get_n_from_word_set(word_set)
+        self.MAX_GUESSES = int(config['max_guesses'])
         self.all_words = word_set
         self.check_word(word)
         self._word = word.lower()
@@ -64,7 +65,7 @@ class Wordle:
             if self.verbose:
                 print(f'Solved! - [{guess}]')
             self.state = Wordle.SOLVED
-        elif len(self.guesses) >= MAX_GUESSES:
+        elif len(self.guesses) >= self.MAX_GUESSES:
             if self.verbose:
                 print(f'Lost! Word was [{self._word}] - {self.guesses}')
             self.state = Wordle.UNSOLVED

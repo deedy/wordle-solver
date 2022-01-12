@@ -1,15 +1,9 @@
 from typing import List, Dict, Set, Tuple, Type
 from collections import defaultdict, Counter
-from ..constants import MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT
+from ..constants import DEFAULT_MAX_GUESSES, NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_SOLVER_SETTINGS
 from ..wordle import Wordle
 from .util import is_guessable_word
 from ..util import get_n_from_word_set
-	
-DEFAULT_SETTINGS = {
-	'use_conditional': True,
-	'non_strict': True,
-	'use_pos': True,
-}
 
 def parse_clues(clues: List[Tuple[str, List[int]]], debug=False) -> Tuple[Dict[str, Set[int]], Dict[str, Set[int]], Set[str]]:
 	if not len(clues):
@@ -42,12 +36,13 @@ def parse_clues(clues: List[Tuple[str, List[int]]], debug=False) -> Tuple[Dict[s
 def solve_wordle(
 	word_set: List[str],
 	wordle: Type[Wordle],
-	settings: Dict[str, bool]=DEFAULT_SETTINGS,
+	solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
 	debug: bool=False
 ) -> Tuple[bool, int, List[str]]:
     clues = []
+    MAX_GUESSES = int(solver_settings['max_guesses'])
     for i in range(MAX_GUESSES):
-        chosen, cands, numcands = guess_next_word(word_set, clues, settings=settings, debug=debug)
+        chosen, cands, numcands = guess_next_word(word_set, clues, solver_settings=solver_settings, debug=debug)
         if debug:
             print(f'Choosing [{chosen}]. Total {numcands} candidates: {cands}...')
         clue, state = wordle.guess(chosen)
@@ -70,10 +65,11 @@ NON_POS_WEIGHT = 0.5
 def guess_next_word(
 	word_set: List[str],
 	clues: List[Tuple[str, List[int]]],
-	settings: Dict[str, bool]=DEFAULT_SETTINGS,
+	solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
 	debug=False
 ) -> Tuple[str, List[str], int]:
 	N = get_n_from_word_set(word_set)
+	MAX_GUESSES = int(solver_settings['max_guesses'])
 	word_right_place, in_word_wrong_place, not_in_word = parse_clues(clues, debug=debug)
 	prev_guesses = set([w for w, _ in clues])
 	if len(clues) and clues[-1][1] == [GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT, GUESS_RIGHT_SPOT]:
@@ -83,10 +79,10 @@ def guess_next_word(
 			if not w in prev_guesses and is_guessable_word(w, word_right_place, in_word_wrong_place, not_in_word)]
 			
 	char_freq_heuristic = defaultdict(int)
-	if not settings['non_strict']:
+	if not solver_settings['non_strict']:
 		# TODO(deedy): Support use_pos when non_strict
 		char_distribution_words = word_set
-		if settings['use_conditional']:
+		if solver_settings['use_conditional']:
 			# Heuristic should be conditional on what is left!
 			char_distribution_words = cands
 		char_dist = Counter([l for c in char_distribution_words for l in c]).most_common()
@@ -138,7 +134,7 @@ def guess_next_word(
 	if total_unknown_freq == 0:
 		# Does this happen? 
 		import pdb; pdb.set_trace()
-	if not settings['use_pos']:
+	if not solver_settings['use_pos']:
 		def sort_maximal_nonpos(word):
 			# Sort by the number of times a character in a word appears
 			# globally in any unknown place in the remaining candidate set

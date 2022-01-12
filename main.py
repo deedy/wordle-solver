@@ -1,14 +1,14 @@
 from collections import Counter
 from dictionary import dictionary
 from game.wordle import Wordle
-from game.constants import DEFAULT_N, MAX_GUESSES
+from game.constants import DEFAULT_N, DEFAULT_MAX_GUESSES, DEFAULT_GAME_CONFIG, DEFAULT_SOLVER_SETTINGS
 from game.solver.solver import guess_next_word, solve_wordle
 from game.util import get_n_from_word_set
 import argparse
 import random
 import sys
 from time import time
-from typing import List
+from typing import Dict, List
 
 
 PLAY = 'play'
@@ -17,9 +17,9 @@ SHOW = 'show'
 EVAL = 'eval'
 
 
-def play(word_set: List[str]):
+def play(word_set: List[str], game_config: Dict[str, str]):
     hidden_word = random.choice(word_set)
-    w = Wordle(word_set, hidden_word)
+    w = Wordle(word_set, hidden_word, config=game_config)
     while w.state == Wordle.PLAYING:
         # TODO(deedy): Add support for guessed letters in Wordle
         guess = input('Guess? ')
@@ -28,22 +28,22 @@ def play(word_set: List[str]):
         except Exception as e:
             print(f'Error: {str(e)}')
 
-def show(word_set: List[str], words: List[str], debug=False):
+def show(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug=False):
     for word in words:
         try:
             print(f'Word [{word.upper()}]')
-            w = Wordle(word_set, word)
-            solve_wordle(word_set, w, debug=debug)
+            w = Wordle(word_set, word, config=game_config)
+            solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
         except Exception as e:
             print(f'Error: {str(e)}')
         print('\n\n')
 
-def solve(word_set: List[str], debug=False):
+def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug=False):
     N = get_n_from_word_set(word_set)
     clues = []
     guesses = 0
-    while guesses < MAX_GUESSES:
-        chosen, cands, lencands = guess_next_word(word_set, clues, debug=debug)
+    while guesses < int(game_config['max_guesses']):
+        chosen, cands, lencands = guess_next_word(word_set, clues, solver_settings=solver_settings, debug=debug)
         if not chosen:
             print(f'Solved! = {clues[-1][0]}')
             sys.exit()
@@ -60,7 +60,7 @@ def solve(word_set: List[str], debug=False):
         clues.append((chosen, feedback_parsed)) 
     print(f'Unsolved!')
 
-def eval(word_set: List[str], words: List[str]):
+def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str]):
     print(f'Evaluating on {len(words)} words. Total available words: {len(word_set)}')
     fails = []
     start = time()
@@ -70,8 +70,8 @@ def eval(word_set: List[str], words: List[str]):
         if count and count % 10 == 0:
             print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
         word = words[x]
-        w = Wordle(word_set, word, verbose=False)
-        got_ans, attempts, cands = solve_wordle(word_set, w, debug=False)
+        w = Wordle(word_set, word, config=game_config, verbose=False)
+        got_ans, attempts, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=False)
         attempt_tot += attempts
         if not got_ans:
             fails.append((word, len(cands)))
@@ -112,22 +112,31 @@ def main():
                         required=False)
     parser.add_argument('-N',
                         type=int,
-                        help='Value of N',
+                        help='Value of N - the length of the word',
                         default=DEFAULT_N,
+                        required=False)
+    parser.add_argument('--guesses',
+                        type=int,
+                        help='Value of MAX_GUESSES',
+                        default=DEFAULT_MAX_GUESSES,
                         required=False)
     args = parser.parse_args()
     N = args.N
     word_set = dictionary.read_words_of_length(N)
+    game_config = DEFAULT_GAME_CONFIG
+    game_config['max_guesses'] = str(args.guesses)
+    solver_settings = DEFAULT_SOLVER_SETTINGS
+    solver_settings['max_guesses'] = str(args.guesses)
     if args.mode == PLAY:
-        play(word_set)
+        play(word_set, game_config=game_config)
     elif args.mode == SHOW:
         if not args.word and not args.random:
             print(f'Error: Must provide word to solve with -w/--word or -r/--random.')
             sys.exit() 
         words = args.word.split(',') if args.word else [random.choice(word_set)]
-        show(word_set, words, debug=args.debug)
+        show(word_set, words, game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == SOLVE:
-        solve(word_set, debug=args.debug)
+        solve(word_set, game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == EVAL:
         if args.word:
             words = args.word.split(',')
@@ -136,7 +145,7 @@ def main():
             if not args.k:
                 K = len(word_set)
             words = random.sample(word_set, K)
-        eval(word_set, words)    
+        eval(word_set, words, game_config=game_config, solver_settings=solver_settings)    
 
 
 if __name__ == '__main__':
