@@ -178,13 +178,15 @@ Using other values of `N` with `MAX_GUESSES=6`, with the optimal solver:
 
 ### Evil Wordle
 
-The solver's solution to [Evil Wordle](https://swag.github.io/evil-wordle/) is in 5 tries. I believe the minimum you can go is a 4-ply solution, but it's not necessary that the best Evil Wordle solver is the most accurate Wordle solver. 
+The solver's solution to [Evil Wordle](https://swag.github.io/evil-wordle/) is in 5 tries. It takes 5 tries in hard mode as well. I believe the minimum you can go is a 4-ply solution, but it's not necessary that the best Evil Wordle solver is the most accurate Wordle solver. 
 
 <img width="248" alt="Screen Shot 2022-01-12 at 5 33 09 PM" src="https://user-images.githubusercontent.com/1846373/149136925-39e5c80f-9a5a-479b-a807-de654cabc432.png">
+
+For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solution. 
+<img width="283" alt="Screen Shot 2022-01-12 at 5 42 19 PM" src="https://user-images.githubusercontent.com/1846373/149138177-cd044202-6cd4-4dcd-a203-d8c5f1052a8e.png">
 
 
 # Future Work
 
- - Support passing in solver settings through command line, including the weight of `NON_POS_WEIGHT`
- - Support passing in a custom dictionary through settings
- - Expose customizable number of letters in the word (`N`) and `MAX_GUESSES`.
+ - Support passing in more solver settings through command line, including the weight of `NON_POS_WEIGHT`
+ - Support a separate guess set and valid word set
