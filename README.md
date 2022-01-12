@@ -148,6 +148,7 @@ Results of the evaluation and performance of the eval depend greatly on the choi
  - `data/unix_words.txt`: 8497 lowercase 5-letter words. Source: Default `/usr/share/dict/words` on Mac machines.
  - `'data/lexicon_4958.txt`: 4958 5-letter words. Source: @dsivakumar's https://github.com/aravinho/wordle_public/blob/main/wordle/lexicons/lexicon_4958. Explanation on how this is derived is in the repo.
  - `data/sgb-words.txt`: 5757 5-letter words. The list of 5-letter words from Knuth's Stanford Graph Base. Source: https://www-cs-faculty.stanford.edu/~knuth/sgb-words.txt
+ - `data/five_letter_common.txt`: 2499 common 5-letter words. This is the same word list used in https://swag.github.io/evil-wordle/
 
 The official Wordle game uses a large lexicon for valid guess words, but a smaller subset for valid magic words. We ignore this assumption and assume any valid word can be guessed. 
 
