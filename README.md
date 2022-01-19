@@ -149,6 +149,8 @@ Results of the evaluation and performance of the eval depend greatly on the choi
  - `'data/lexicon_4958.txt`: 4958 5-letter words. Source: @dsivakumar's https://github.com/aravinho/wordle_public/blob/main/wordle/lexicons/lexicon_4958. Explanation on how this is derived is in the repo.
  - `data/sgb-words.txt`: 5757 5-letter words. The list of 5-letter words from Knuth's Stanford Graph Base. Source: https://www-cs-faculty.stanford.edu/~knuth/sgb-words.txt
  - `data/five_letter_common.txt`: 2499 common 5-letter words. This is the same word list used in https://swag.github.io/evil-wordle/
+ - `data/official_wordle_all.txt`: All 12972 official valid 5-letter words taken from the Wordle website source https://www.powerlanguage.co.uk/wordle/main.c1506a22.js
+ - `data/official_wordle_common.txt`: The official 2315 "common" guessable 5-letter words taken from the Wordle website source https://www.powerlanguage.co.uk/wordle/main.c1506a22.js
 
 The official Wordle game uses a large lexicon for valid guess words, but a smaller subset for valid magic words. We ignore this assumption and assume any valid word can be guessed. 
 
