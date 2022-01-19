@@ -63,20 +63,23 @@ def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], sol
     print(f'Evaluating on {len(words)} words. Total available words: {len(word_set)}')
     fails = []
     start = time()
+    attempts = []
     attempt_tot = 0
     for x in range(len(words)):
         count = x+1
         if count and count % 10 == 0:
-            print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
+            print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {sum([a[1] for a in attempts])/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
         word = words[x]
         w = Wordle(word_set, word, config=game_config, verbose=debug >= 2)
-        got_ans, attempts, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
-        attempt_tot += attempts
+        got_ans, attempt_count, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
         if not got_ans:
             fails.append((word, len(cands)))
+        else:
+            attempts.append((word, attempt_count))
     failed_words = [f[0] for f in fails]
     print(f'Failed on: {failed_words}')
     print(f'Distribution of remaining candidates: {Counter([f[1] for f in fails]).most_common()}')
+    print(f'Distribution of attempts needed: {Counter([a[1] for a in attempts]).most_common()}')
     print(f'K={len(words)}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/len(words))*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
 
 def main():
