@@ -14,7 +14,7 @@ PLAY = 'play'
 SOLVE = 'solve'
 SHOW = 'show'
 EVAL = 'eval'
-
+EXPT = 'expt'
 
 def play(game_config: Dict[str, str]):
     hidden_word = random.choice(game_config['candidate_set'])
@@ -107,7 +107,7 @@ def main():
     parser.add_argument('-m',
                         '--mode',
                         help='Run mode. Default none',
-                        choices=[PLAY, SHOW, SOLVE, EVAL],
+                        choices=[PLAY, SHOW, SOLVE, EVAL, EXPT],
                         default=None,
                         required=True)
     parser.add_argument('-w',
@@ -218,7 +218,10 @@ def main():
             if not args.k:
                 K = len(solver_settings['candidate_set'])
             words = random.sample(solver_settings['candidate_set'], K)
-        eval(words, args.eval_out_file, game_config=game_config, solver_settings=solver_settings)    
+        eval(words, args.eval_out_file, game_config=game_config, solver_settings=solver_settings)
+    elif args.mode == EXPT:
+        # Your code here
+        pass
 
 
 if __name__ == '__main__':
