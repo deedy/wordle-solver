@@ -106,18 +106,27 @@ def guess_next_word(
             # Sort by the number of times a character in a word appears
             # in the right position of any unknown place in the word and weigh
             # it with appearances in the wrong place by NON_POS_WEIGHT
-            score = [0]*26
-            nonpos_score = [0]*26
+            visited = [0 for i in range(26)]
+            score, nonpos_score = 0, 0
             for i, c in enumerate(word):
+                charix = ord(c)-ord('a')
+                if visited[charix]:
+                    continue 
+                else:
+                    visited[charix] = 1
                 # += does well also but performs worse for duplicate letters
-                score[ord(c)-ord('a')] = conditional_pos_freq[i][c]
-                nonpos_score[ord(c)-ord('a')] = conditional_unknown_freq[c] - conditional_pos_freq[i][c]
-            sortscore = -(sum(score) + NON_POS_WEIGHT * sum(nonpos_score))
+                score += conditional_pos_freq[i][c]
+                nonpos_score += conditional_unknown_freq[c] - conditional_pos_freq[i][c]
+                # # += does well also but performs worse for duplicate letters
+                # score[charix] = conditional_pos_freq[i][c]
+                # nonpos_score[charix] = conditional_unknown_freq[c] - score[charix]
+            sortscore = -(score + NON_POS_WEIGHT * nonpos_score)
             if sort:
                 return sortscore
             return ([(chr(i + ord('a')), v) for i, v in enumerate(score) if v],
                     [(chr(i + ord('a')), v) for i, v in enumerate(nonpos_score) if v], sortscore)
         sortfn = sort_maximal_position_with_nonpos
+
     
     explorable = word_set if solver_settings['non_strict'] else cands
     explorable = [cand for cand in explorable if cand not in prev_guesses]
@@ -150,6 +159,6 @@ def guess_next_word(
 
     if not len(explorable):
         raise Exception(f'No more explorable candidates. This should never happen.')
-    chosen = explorable[0]
+    chosen = min(explorable)
     return chosen, cands[:5], len(cands)
      

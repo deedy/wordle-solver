@@ -76,9 +76,7 @@ def eval(words: List[str], out_file: str, game_config: Dict[str, str], solver_se
             print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {sum([len(a[1]) for a in attempts])/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
         word = words[x]
         w = Wordle(word, config=game_config, verbose=debug >= 2)
-        solv = time()
         got_ans, attempt_count, cands = solve_wordle(w, solver_settings=solver_settings, debug=debug)
-        print(f'Run {time()-solv:0.3f}s')
         if not got_ans:
             fails.append((word, w.guesses))
         else:
