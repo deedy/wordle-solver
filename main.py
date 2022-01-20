@@ -49,15 +49,20 @@ def solve(game_config: Dict[str, str], solver_settings: Dict[str, str], debug: i
             print(f'Solved! = {clues[-1][0]}')
             sys.exit()
         print(f'Try the word [{chosen.upper()}]. There are {lencands} possible words: {cands[:10]}...')
-        feedback = input('How did it do (0=⬛, 1=🟨, 2=🟩) e.g. 00000? ')
+        feedback = input('How did it do (0=⬛, 1=🟨, 2=🟩) e.g. 00000 or ⬛⬛⬛⬛⬛? ')
+        feedback = feedback.strip()
         if len(feedback) != N:
             print(f'Error: Result must be {N} length.')
             continue
-        if len(set(feedback + '012')) > 3:
+        if len(set(feedback + '012')) <= 3:
+            feedback_parsed = [ord(f) - ord('0') for f in feedback]
+        elif len(set(feedback + '⬛🟨🟩')) <= 3:
+            reverse_emoji_map = {v: k for k, v in Wordle.EMOJI_MAP.items()}
+            feedback_parsed = [reverse_emoji_map[f] for f in feedback]
+        else:
             print(f'Error: Must only be 0, 1, or 2')
             continue
         guesses += 1
-        feedback_parsed = [ord(f) - ord('0') for f in feedback]
         clues.append((chosen, feedback_parsed)) 
     print(f'Unsolved!')
 
