@@ -6,7 +6,7 @@ The official Wordle game can have *2,315* candidate hidden words and *12,972* va
 
 Features:
  - Supports 4 modes: `play`, `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) and `eval` (evaluate the performance)
- - Mostly deterministic (sometimes tie-breakers in sort functions change the results on different runs)
+ - Mostly deterministic (we arbitrarily select the chronologically lowest word in tie-breakers)
  - Highest accuracy of all solutions evaluated
  - Support custom dictionaries with `--dict_file` and candidate files with `--cand_file` if different from the underlying dictionary.
  - Support custom length wordles with `-N` and custom max guesses with `--guesses`.
