@@ -123,10 +123,8 @@ def guess_next_word(
     explorable = [cand for cand in explorable if cand not in prev_guesses]
     explorable.sort(key=sortfn)
     max_val = sortfn(explorable[0])
-    explorable = sorted([x for x in explorable if sortfn(x) == max_val])
-    # Add sort to make truly deterministic
-    explorable.sort()
-    
+    explorable = [x for x in explorable if sortfn(x) == max_val]
+
     if len(explorable) > 0:
         # Break ties by boosting words with known letter guesses because
         # they can appear in the word again and need to be explicitly checked for
@@ -143,8 +141,6 @@ def guess_next_word(
         explorable.sort(key=boost_letters_in_right_place)
         max_val2 = boost_letters_in_right_place(explorable[0])
         explorable = [x for x in explorable if boost_letters_in_right_place(x) == max_val2]
-        # Add sort to make truly deterministic
-        explorable.sort()
     
     if debug >= 2:
         print('Inferred conditions ', [''.join(m) for m in new_musts])
@@ -154,6 +150,6 @@ def guess_next_word(
 
     if not len(explorable):
         raise Exception(f'No more explorable candidates. This should never happen.')
-    chosen = explorable[0]  
+    chosen = min(explorable)
     return chosen, cands[:5], len(cands)
      

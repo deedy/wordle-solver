@@ -163,15 +163,24 @@ The official Wordle game uses a large lexicon for valid guess words, but a small
 The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*. The distribution of number of attempts is:
 
  - Two: 58 (2.5%)
- - Three: 730 (31.5%)
- - Four: 1196 (51.66%)
- - Five: 313 (13.5%)
- - Six: 18 (<1%)
+ - Three: 733 (31.5%)
+ - Four: 1213 (52.5%)
+ - Five: 292 (12.5%)
+ - Six: 19 (<1%)
  
 Note: I believe @npinsker's full Rust brute force solution shared on Twitter achieves a 3.47 average attempts, and starts with *SOARE*.
 
 
-On the first 200 real world Wordles, every word was solved with an average number of attempts of *3.85* with `jaunt` consistently taking 6 attempts. Here's a full solution to `jaunt` which takes 6 guesses:
+On the first 200 real world Wordles, every word was solved with an average number of attempts of *3.85* with `jaunt` consistently taking 6 attempts. The other words that took 6 attempts and their patterns are: 
+ - The ?OLLY pattern: `golly,folly,jolly`
+ - The ?A?ER pattern: `racer,wafer,baker,rarer,maker,waver`
+ - The ?I?ER pattern: `riper,piper`
+ - The ?IGHT pattern: `might,tight`
+ - The ?AUNT pattern: `gaunt,jaunt`
+ - The ?ATCH pattern: `hatch,watch`
+ - The RE?EL pattern: `repel,rebel`
+
+Here's a full solution to `jaunt` which takes 6 guesses:
 
 ```
 Word [JAUNT]
