@@ -150,6 +150,6 @@ def guess_next_word(
 
     if not len(explorable):
         raise Exception(f'No more explorable candidates. This should never happen.')
-    chosen = min(explorable)
+    chosen = explorable[0]
     return chosen, cands[:5], len(cands)
      
