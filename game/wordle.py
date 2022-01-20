@@ -15,14 +15,14 @@ class Wordle:
     
     def __init__(self, word: str, config: Dict[str, str] = DEFAULT_GAME_CONFIG, verbose=True):
         self._word = word.lower()
-        if not 'candidate_set' in config: 
+        if not 'candidate_set' in config or not len(config['candidate_set']): 
             raise Exception('candidate_set not specified in config')
         self.candidate_set = set(config['candidate_set'])
         self.N = get_n_from_word_set(config['candidate_set'])
         self.MAX_GUESSES = int(config['max_guesses'])
         self.check_word(self._word, self.candidate_set)
 
-        if not 'guess_set' in config: 
+        if not 'guess_set' in config or not len(config['guess_set']): 
             raise Exception('guess_set not specified in config')
         self.guess_set = set(config['guess_set'])
 

@@ -37,12 +37,28 @@ def guess_next_word(
     solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
     debug: int=1,
 ) -> Tuple[str, List[str], int]:
-    if not 'guess_set' in solver_settings: 
+    if not 'guess_set' in solver_settings or not len(solver_settings['guess_set']): 
         raise Exception('guess_set not specified in config')
     word_set = solver_settings['guess_set']
-    if not 'candidate_set' in solver_settings: 
+    if not 'candidate_set' in solver_settings or not len(solver_settings['candidate_set']): 
         raise Exception('candidate_set not specified in config')
     candidates = solver_settings['candidate_set']
+
+    if len(solver_settings['solution_tree']):
+        base = solver_settings['solution_tree']
+        for word, clue in clues:
+            if not word in base:
+                raise Exception('No candidates left! Its possible you\'re not using an accurate solution tree for this configuration!')
+            strclue = ''.join(map(str, clue))
+            if not strclue in base[word]:
+                raise Exception('No candidates left! Its possible you\'re not using an accurate solution tree for this configuration!')
+            base = base[word][strclue]
+        keys = list(base.keys())
+        if not len(keys):
+            raise Exception('No candidates left! Its possible you\'re not using an accurate solution tree for this configuration!')
+        return keys[0], [keys[0]], 1
+
+
 
     N = get_n_from_word_set(word_set)
     MAX_GUESSES = int(solver_settings['max_guesses'])
@@ -50,7 +66,7 @@ def guess_next_word(
     word_right_place, in_word_wrong_place, not_in_word = parse_clues(clues, debug=debug)
     prev_guesses = set([w for w, _ in clues])
     # Check if the last clue was fully correct
-    if len(clues) and len(clues[-1][1]) and len(set(clues[-1][1])) == 1 and clues[-1][1][0] == GUESS_RIGHT_SPOT:
+    if len(clues) and len(clues[-1][1]) and is_guessable_word(clues[-1][0], word_right_place, in_word_wrong_place, not_in_word) and len(set(clues[-1][1])) == 1 and clues[-1][1][0] == GUESS_RIGHT_SPOT:
         return None, [], 0
 
     cands = [w for w in candidates \

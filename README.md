@@ -13,6 +13,7 @@ Features:
  - Supports "hard mode" where each guess must conform to previous hints with `--hard`.
  - Fully tested
  - Latency `~0.26s` per run on default ~9000 word dict and all 5 letter words.
+ - Now supports an extra mode called `gen_tree` which generates a tree for the entire solution set given a game and solver configuration.
 Current dictionary used is the `--dict_file data/official_wordle_all.txt --cand_file data/official_wordle_common.txt`, which is the official Wordle setting.
 
 
@@ -160,12 +161,12 @@ The official Wordle game uses a large lexicon for valid guess words, but a small
 
 ### Official Wordle
 
-The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*. The distribution of number of attempts is:
+The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.77*. The distribution of number of attempts is:
 
  - Two: 58 (2.5%)
- - Three: 733 (31.5%)
- - Four: 1213 (52.5%)
- - Five: 292 (12.5%)
+ - Three: 732 (31.5%)
+ - Four: 1222 (52.5%)
+ - Five: 284 (12.5%)
  - Six: 19 (<1%)
  
 Note: I believe @npinsker's full Rust brute force solution shared on Twitter achieves a 3.47 average attempts, and starts with *SOARE*.
@@ -260,4 +261,5 @@ For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solut
    - Demo: http://www.npinsker.me/puzzles/wordle/
    - Code (Rust): https://gist.github.com/npinsker/a495784b9c6eacfe481d8e38963b335c
    - Tweet: https://twitter.com/npinsker/status/1478981155529519104
+ - Bug: Correctly support letter out of place when dealing with words with two repeating letters
  - Expose into a web UI solver in a static UI.

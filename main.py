@@ -14,7 +14,7 @@ PLAY = 'play'
 SOLVE = 'solve'
 SHOW = 'show'
 EVAL = 'eval'
-EXPT = 'expt'
+GEN_TREE = 'gen_tree'
 
 def play(game_config: Dict[str, str]):
     hidden_word = random.choice(game_config['candidate_set'])
@@ -107,7 +107,7 @@ def main():
     parser.add_argument('-m',
                         '--mode',
                         help='Run mode. Default none',
-                        choices=[PLAY, SHOW, SOLVE, EVAL, EXPT],
+                        choices=[PLAY, SHOW, SOLVE, EVAL, GEN_TREE],
                         default=None,
                         required=True)
     parser.add_argument('-w',
@@ -165,6 +165,11 @@ def main():
                         help='A file to write the detailed outputs for the eval to.',
                         default=None,
                         required=False)
+    parser.add_argument('--tree_file',
+                        type=str,
+                        help='A file that contains the pickled vesion of the solution tree for the official wordle configuration.',
+                        default=None,
+                        required=False)
     args = parser.parse_args()
     N = args.N
     if args.dict_file != DEFAULT_DICT:
@@ -198,6 +203,9 @@ def main():
     solver_settings['non_strict'] = not args.hard_mode
     solver_settings['candidate_set'] = candidate_set
     solver_settings['guess_set'] = word_set
+    if args.tree_file:
+        import pickle
+        solver_settings['solution_tree'] = pickle.load(open(args.tree_file, 'rb'))
     if args.mode == PLAY:
         play(game_config=game_config)
     elif args.mode == SHOW:
@@ -209,7 +217,7 @@ def main():
     elif args.mode == SOLVE:
         solve(game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == EVAL:
-        if not args.eval_out_file:
+        if not args.    :
             print(f'Running eval. Specify --eval_out_file to write the details of the eval to a file.')
         if args.word:
             words = args.word.split(',')
@@ -219,10 +227,68 @@ def main():
                 K = len(solver_settings['candidate_set'])
             words = random.sample(solver_settings['candidate_set'], K)
         eval(words, args.eval_out_file, game_config=game_config, solver_settings=solver_settings)
-    elif args.mode == EXPT:
-        # Your code here
-        pass
+    elif args.mode == GEN_TREE:
+        import itertools
+        import pickle
 
+        debug = args.debug
+        choose = ['0' for i in range(N)] + ['1' for i in range(N)] + ['2' for i in range(N)]
+        poss =  sorted(list(set([''.join(x) for x in itertools.permutations(choose, r=N)])))
+        initclues = [[]]
+        solves = []
+        count, solved, unsolved = 0, 0, 0
+        while initclues: 
+            clues = initclues.pop(0)
+            count += 1
+            if count % 10 == 0: 
+                print(f'Count {count} Solved {solved} Unsolved: {unsolved} Clue Num {len(clues)}')
+            if len(clues) > int(game_config['max_guesses']):
+                print(f'Unsolved! {len(clues)}')
+                unsolved += 1
+                continue
+            try:
+                chosen, cands, lencands = guess_next_word(clues, solver_settings=solver_settings, debug=debug)
+            except Exception as e:
+                # There are no candidates left to guess from
+                continue
+            if lencands == 1 and cands[0] in candidate_set:
+                newclue = [c for c in clues]
+                newclue.append((cands[0], [2] * N))
+                print(f'Solved! = {newclue[-1][0]}')
+                solves.append(newclue)
+                solved += 1
+                continue
+            if not chosen and len(clues) and clues[-1][0] in candidate_set:
+                solves.append(clues)
+                solved += 1
+                print(f'Solved! = {clues[-1][0]}')
+                continue
+
+
+            for p in poss:
+                newclue = [c for c in clues]
+                newclue.append((chosen, [ord(f) - ord('0') for f in p]))
+                initclues.append(newclue)
+
+        pickle.dump(solves, file=open('tree/solves.pickle', 'wb'))
+        with open('solves.txt', 'w') as f:
+            for s in solves:
+                f.write(f'{s}\n')
+
+        solution_tree = {}
+        solved_clue = ''.join(['2'] * N)
+        for solution in solves:
+            currdict = solution_tree
+            for word, clue in solution:
+                if not word in currdict:
+                    currdict[word] = {}
+                strclue = ''.join(map(str, clue))
+                if strclue == solved_clue:
+                    continue
+                if not strclue in currdict[word]:
+                    currdict[word][strclue] = {}
+                currdict = currdict[word][strclue]
+        pickle.dump(solution_tree, file=open('solution_tree.pickle', 'wb'))
 
 if __name__ == '__main__':
     main()
