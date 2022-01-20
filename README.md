@@ -212,7 +212,16 @@ Solved! - [jaunt]
 Woohoo! Solver solved it in 6 guesses!
 ```
 
-With `--gen_tree`, in ~30mins on the official Wordle data we can explore every single avenue with which to play the game. Because the underlying solver is deterministic, this is essentially a cached version of the solver's solution given certain solver settings. We generated `tree/solution_tree.pickle` which is ~125KB and stores the moves to guess all 2315 possible words and support using these with `--tree_file`. This tree file can then be loaded up as a small drop-in replacement to solve Wordles online. 
+With `--gen_tree`, in ~30mins on the official Wordle data we can explore every single avenue with which to play the game. Because the underlying solver is deterministic, this is essentially a cached version of the solver's solution given certain solver settings. We generated `tree/solution_tree.pickle` which is ~125KB and stores the moves to guess all 2315 possible words and support using these with `--tree_file`. This tree file can then be loaded up as a small drop-in replacement to solve Wordles online. Some statistics on the solution:
+ - In every variant of the game, only `2,677` of total `12,972` guessable words were used (20.7% of words used).
+ - The max dept of the tree is 6, for 19 nodes. The average depth is 3.78. 
+ - The starting node is `soare` after which there are 127 of the possible (3^5 = 243) valid clues Wordle can return. 
+ - After `soare`, the most likely outcomes are:
+ 	- ⬛⬛⬛⬛⬛ 8%, or 183/2315 time, the next guess is `linty`. Average attempts in this path: `4.09`
+ 	- ⬛⬛🟨⬛⬛ 6%, or 138/2315 time, the next guess is `canty`. Average attempts in this path: `4.09`
+ 	- ⬛⬛⬛⬛🟨 5.2%, or 120/2315 time, the next guess is `inlet`. Average attempts in this path: `3.84`
+ 	- ⬛⬛⬛🟨🟨 5%, or 120/2315 time, the next guess is `cider`. Average attempts in this path: `4.14`
+ 	- ⬛🟩⬛⬛⬛ 3.7%, or 87/2315 time, the next guess is `bludy`. Average attempts in this path: `4.11`
 
 
 ### On 8636 Scrabble Words list
