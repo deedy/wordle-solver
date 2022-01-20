@@ -212,6 +212,7 @@ Solved! - [jaunt]
 Woohoo! Solver solved it in 6 guesses!
 ```
 
+With `--gen_tree`, in ~30mins on the official Wordle data we can explore every single avenue with which to play the game. Because the underlying solver is deterministic, this is essentially a cached version of the solver's solution given certain solver settings. We generated `tree/solution_tree.pickle` which is ~125KB and stores the moves to guess all 2315 possible words and support using these with `--tree_file`. This tree file can then be loaded up as a small drop-in replacement to solve Wordles online. 
 
 
 ### On 8636 Scrabble Words list
@@ -263,3 +264,23 @@ For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solut
    - Tweet: https://twitter.com/npinsker/status/1478981155529519104
  - Bug: Correctly support letter out of place when dealing with words with two repeating letters
  - Expose into a web UI solver in a static UI.
+
+# Changelog
+
+ - 3.0 (Jan 19) The "Official" 100% Wordle release
+ 	- Add official Wordle dicts, report 100% number on all official Wordle words.
+ 	- Support separate candidate and guess dictionaries (`--dict_file` and `--cand_file`) just like the official game.
+ 	- Support generating and playing with a cached solution tree (almost instant!)
+ 	- Make solver fully deterministic.
+ 	- Support emoji input in `solve` mode. 
+ 	- Support `--eval_out_file` to be able to explore the results of an eval. 
+ - 2.0 (Jan 12) The "Flexible" release
+ 	- Support custom dictionaries used by online wordle solvers with proper documentation and  add `--dict_file` to provide a custom dictionary.
+ 	- Support customizing `--N`, the number of guesses, and `--max_guesses`, the max guesses for a game. 
+ 	- Better handle exceptions in edge cases where no candidates exist. 
+ 	- Parameterize non pos weight. 
+ 	- Add options for `--hard` mode, `--debug` to understand what's going on better.
+ 	- Better solving logic: optimize explore guessing, better char selection when duplicate chars.
+ - 1.0 (Jan 9) The "Working" release
+ 	- Supports various different modes and achieves a `99.35%+` success rate on the `8636` valid 5 letter scrabble words. 
+ 	- Allows you to `-m play`, `-m solve`, `-m show` a solution for a word and `-m eval` to evaluate the logic across various words.
