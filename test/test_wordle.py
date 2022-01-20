@@ -1,34 +1,36 @@
 import unittest
 from game.wordle import Wordle
 
+GAME_CONFIG = {}
+
 class TestWordle(unittest.TestCase):
 
 	def test_invalid_word_list(self):
 		with self.assertRaises(Exception) as context:
-			w = Wordle(['gorge', 'gorges'], 'gorge')
+			w = Wordle('gorge', config={'candidate_set': ['gorge', 'gorges']})
 		with self.assertRaises(Exception) as context:
-			w = Wordle([], 'gorge')
+			w = Wordle('gorge', config={'candidate_set': []})
 
 	def test_solved(self):
-		w = Wordle(['gorge'], 'gorge')
+		w = Wordle('gorge', config={'candidate_set': ['gorge'], 'max_guesses': '6'})
 		clue, state = w.guess('gorge')
 		self.assertEqual(state, Wordle.SOLVED, "Should be solved!")
 		self.assertEqual(Wordle.emojify(clue), '🟩🟩🟩🟩🟩', "Should be solved!")
 
 	def test_missed_all(self):
-		w = Wordle(['gorge', 'unlit'], 'gorge')
+		w = Wordle('gorge', config={'candidate_set': ['gorge', 'unlit'], 'max_guesses': '6'})
 		clue, state = w.guess('unlit')
 		self.assertEqual(state, Wordle.PLAYING, "Should be playing!")
 		self.assertEqual(Wordle.emojify(clue), '⬛⬛⬛⬛⬛', "Should be playing!")
 
 	def test_scrambled(self):
-		w = Wordle(['steal', 'tesla'], 'tesla')
+		w = Wordle('tesla', config={'candidate_set': ['steal', 'tesla'], 'max_guesses': '6'})
 		clue, state = w.guess('steal')
 		self.assertEqual(state, Wordle.PLAYING, "Should be playing!")
 		self.assertEqual(Wordle.emojify(clue), '🟨🟨🟨🟨🟨', "Should be wrong place!")
 
 	def test_full_game_solved(self):
-		w = Wordle(['steal', 'tesla', 'teals', 'unlit', 'swims', 'swabs'], 'tesla')
+		w = Wordle('tesla', config={'candidate_set': ['steal', 'tesla', 'teals', 'unlit', 'swims', 'swabs'], 'max_guesses': '6'})
 		clue, state = w.guess('steal')
 		self.assertEqual(Wordle.emojify(clue), '🟨🟨🟨🟨🟨', "Should be wrong place!")
 		clue, state = w.guess('swabs')
@@ -48,7 +50,7 @@ class TestWordle(unittest.TestCase):
 		self.assertEqual(state, Wordle.SOLVED, "Should be solved!")
 
 	def test_full_game_unsolved(self):
-		w = Wordle(['steal', 'tesla', 'teals', 'unlit', 'swims', 'swabs', 'brain'], 'tesla')
+		w = Wordle('tesla', config={'candidate_set': ['steal', 'tesla', 'teals', 'unlit', 'swims', 'swabs', 'brain'], 'max_guesses': '6'})
 		clue, state = w.guess('steal')
 		self.assertEqual(Wordle.emojify(clue), '🟨🟨🟨🟨🟨', "Should be wrong place!")
 		clue, state = w.guess('swabs')

@@ -1,5 +1,6 @@
 import unittest
 from game.solver.solver import guess_next_word, parse_clues
+from game.constants import DEFAULT_SOLVER_SETTINGS
 
 class TestUtils(unittest.TestCase):
 
@@ -22,19 +23,22 @@ class TestUtils(unittest.TestCase):
 
 	def test_guess_next_word(self):
 		clues = [('arose', [0, 0, 0, 0, 0])]
-		guess, cands, lencands = guess_next_word(['arose', 'unlit'], clues)
+		settings = DEFAULT_SOLVER_SETTINGS
+		settings['candidate_set'] = ['arose', 'unlit']
+		guess, cands, lencands = guess_next_word(clues, solver_settings=settings)
 		self.assertEqual(guess, 'unlit', "Guess correctly")
 		self.assertEqual(cands, ['unlit'], "Candidates correctly")
 		self.assertEqual(lencands, 1, "Num candidates correctly")
 
 	def test_guess_next_word(self):
 		clues = [('binks', [0, 2, 2, 2, 2])]
-		word_set = ['binks', 'cinks', 'dinks', 'einks', 'finks', 'ginks', 'hinks', 'abcde']
-		guess, cands, lencands = guess_next_word(word_set, clues)
+		settings = DEFAULT_SOLVER_SETTINGS
+		settings['candidate_set'] = ['binks', 'cinks', 'dinks', 'einks', 'finks', 'ginks', 'hinks', 'abcde']
+		guess, cands, lencands = guess_next_word(clues, solver_settings=settings)
 		self.assertEqual(guess, 'abcde', "Guess correctly")
-		self.assertEqual(lencands, len(word_set) - 2, "Num candidates correctly")
+		self.assertEqual(lencands, len(settings['candidate_set']) - 2, "Num candidates correctly")
 		clues = [('binks', [0, 2, 2, 2, 2]), ('abcde', [0, 0, 0, 0, 0])]
-		guess, cands, lencands = guess_next_word(word_set, clues)
+		guess, cands, lencands = guess_next_word(clues, solver_settings=settings)
 		# guesses next word in list without exploring
 		self.assertEqual(guess, 'finks', "Guess correctly")
 		self.assertEqual(lencands, 3, "Num candidates correctly")

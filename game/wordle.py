@@ -23,8 +23,9 @@ class Wordle:
         self.check_word(self._word, self.candidate_set)
 
         if not 'guess_set' in config or not len(config['guess_set']): 
-            raise Exception('guess_set not specified in config')
-        self.guess_set = set(config['guess_set'])
+            self.guess_set = set(config['candidate_set'])
+        else:
+            self.guess_set = set(config['guess_set'])
 
         self.guesses = []
         self.state = Wordle.PLAYING

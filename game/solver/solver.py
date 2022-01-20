@@ -37,14 +37,13 @@ def guess_next_word(
     solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
     debug: int=1,
 ) -> Tuple[str, List[str], int]:
-    if not 'guess_set' in solver_settings or not len(solver_settings['guess_set']): 
-        raise Exception('guess_set not specified in config')
-    word_set = solver_settings['guess_set']
     if not 'candidate_set' in solver_settings or not len(solver_settings['candidate_set']): 
         raise Exception('candidate_set not specified in config')
     candidates = solver_settings['candidate_set']
+    if not 'guess_set' in solver_settings or not len(solver_settings['guess_set']): 
+        word_set = solver_settings['candidate_set']
 
-    if len(solver_settings['solution_tree']):
+    if 'solution_tree' in solver_settings and len(solver_settings['solution_tree']):
         base = solver_settings['solution_tree']
         for word, clue in clues:
             if not word in base:
