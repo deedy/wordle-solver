@@ -1,6 +1,6 @@
 from collections import Counter
 from game.wordle import Wordle
-from game.constants import DEFAULT_N, DEFAULT_MAX_GUESSES, DEFAULT_GAME_CONFIG, DEFAULT_SOLVER_SETTINGS, DEFAULT_DICT
+from game.constants import DEFAULT_N, DEFAULT_MAX_GUESSES, DEFAULT_GAME_CONFIG, DEFAULT_SOLVER_SETTINGS, DEFAULT_DICT, DEFAULT_CAND_DICT
 from game.solver.solver import guess_next_word, solve_wordle
 from game.util import get_n_from_word_set, read_words_of_length
 import argparse
@@ -16,9 +16,9 @@ SHOW = 'show'
 EVAL = 'eval'
 
 
-def play(word_set: List[str], game_config: Dict[str, str]):
-    hidden_word = random.choice(word_set)
-    w = Wordle(word_set, hidden_word, config=game_config)
+def play(game_config: Dict[str, str]):
+    hidden_word = random.choice(game_config['candidate_set'])
+    w = Wordle(hidden_word, config=game_config)
     while w.state == Wordle.PLAYING:
         # TODO(deedy): Add support for guessed letters in Wordle
         guess = input('Guess? ')
@@ -27,22 +27,24 @@ def play(word_set: List[str], game_config: Dict[str, str]):
         except Exception as e:
             print(f'Error: {str(e)}')
 
-def show(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
+def show(words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
     for word in words:
         try:
             print(f'Word [{word.upper()}]')
-            w = Wordle(word_set, word, config=game_config)
-            solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
+            w = Wordle(word, config=game_config)
+            solve_wordle(w, solver_settings=solver_settings, debug=debug)
         except Exception as e:
             print(f'Error: {str(e)}')
         print('\n\n')
 
-def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
-    N = get_n_from_word_set(word_set)
+def solve(game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
+    if not 'guess_set' in solver_settings: 
+        raise Exception('guess_set not specified in config')
+    N = get_n_from_word_set(solver_settings['guess_set'])
     clues = []
     guesses = 0
     while guesses < int(game_config['max_guesses']):
-        chosen, cands, lencands = guess_next_word(word_set, clues, solver_settings=solver_settings, debug=debug)
+        chosen, cands, lencands = guess_next_word(clues, solver_settings=solver_settings, debug=debug)
         if not chosen:
             print(f'Solved! = {clues[-1][0]}')
             sys.exit()
@@ -59,8 +61,11 @@ def solve(word_set: List[str], game_config: Dict[str, str], solver_settings: Dic
         clues.append((chosen, feedback_parsed)) 
     print(f'Unsolved!')
 
-def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
-    print(f'Evaluating on {len(words)} words. Total available words: {len(word_set)}')
+def eval(words: List[str], out_file: str, game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
+    if not 'candidate_set' in solver_settings: 
+        raise Exception('candidate_set not specified in config')
+    candidates = solver_settings['candidate_set']
+    print(f'Evaluating on {len(words)} words. Total available candidate words: {len(candidates)}')
     fails = []
     start = time()
     attempts = []
@@ -68,19 +73,29 @@ def eval(word_set: List[str], words: List[str], game_config: Dict[str, str], sol
     for x in range(len(words)):
         count = x+1
         if count and count % 10 == 0:
-            print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {sum([a[1] for a in attempts])/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
+            print(f'k={count}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/count)*100:.02f}%\tAvg Attempts: {sum([len(a[1]) for a in attempts])/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
         word = words[x]
-        w = Wordle(word_set, word, config=game_config, verbose=debug >= 2)
-        got_ans, attempt_count, cands = solve_wordle(word_set, w, solver_settings=solver_settings, debug=debug)
+        w = Wordle(word, config=game_config, verbose=debug >= 2)
+        got_ans, attempt_count, cands = solve_wordle(w, solver_settings=solver_settings, debug=debug)
         if not got_ans:
-            fails.append((word, len(cands)))
+            fails.append((word, w.guesses))
         else:
-            attempts.append((word, attempt_count))
+            attempts.append((word, w.guesses))
     failed_words = [f[0] for f in fails]
     print(f'Failed on: {failed_words}')
-    print(f'Distribution of remaining candidates: {Counter([f[1] for f in fails]).most_common()}')
-    print(f'Distribution of attempts needed: {Counter([a[1] for a in attempts]).most_common()}')
-    print(f'K={len(words)}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/len(words))*100:.02f}%\tAvg Attempts: {attempt_tot/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
+    print(f'Distribution of remaining candidates: {Counter([len(f[1]) for f in fails]).most_common()}')
+    print(f'Distribution of attempts needed: {Counter([len(a[1]) for a in attempts]).most_common()}')
+    print(f'K={len(words)}:\tFailed: {len(fails)}\tAccuracy:{(1 - len(fails)/len(words))*100:.02f}%\tAvg Attempts: {sum([len(a[1]) for a in attempts])/count:.02f}\tAvg Time: {(time() - start)/count:.03f}s')
+    if out_file:
+        print(f'Writing raw results to file [{out_file}]')
+        # Potentially create custom out_file name if not provided
+        headers = ['word', 'solved', 'guesses', 'attempts']
+        with open(out_file, 'w') as f:
+            f.write(','.join(headers)+'\n')
+            for fail in fails:
+                f.write(','.join([fail[0], '0', '-'.join(fail[1]), str(len(fail[1]))]) + '\n')
+            for attempt in attempts:
+                f.write(','.join([attempt[0], '1', '-'.join(attempt[1]), str(len(attempt[1]))]) + '\n')
 
 def main():
     parser = argparse.ArgumentParser(description='Play Wordle')
@@ -135,8 +150,21 @@ def main():
                         help='Dictionary file to read from',
                         default=DEFAULT_DICT,
                         required=False)
+    parser.add_argument('--cand_file',
+                        type=str,
+                        help='Dictionary file to read potential candidate set from. If not provided, dict_file is used.',
+                        default=DEFAULT_CAND_DICT,
+                        required=False)
+    parser.add_argument('--eval_out_file',
+                        type=str,
+                        help='A file to write the detailed outputs for the eval to.',
+                        default=None,
+                        required=False)
     args = parser.parse_args()
     N = args.N
+    if args.dict_file != DEFAULT_DICT:
+        print(f'Using the same candidates as dict_file: [{args.dict_file}]')
+        args.cand_file = args.dict_file
     try:
         word_set = read_words_of_length(N, fname=args.dict_file)
         if args.debug >= 1:
@@ -144,30 +172,48 @@ def main():
     except Exception as e:
         print(f'Error: {str(e)}')
         sys.exit()
+    if args.cand_file:
+        try:
+            candidate_set = read_words_of_length(N, fname=args.cand_file)
+            if args.debug >= 1:
+                print(f'Read {len(candidate_set)} valid lower case candidate words from [{args.cand_file}]')
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            sys.exit()
+    else:
+        if args.debug >= 1:
+            print(f'Using the same candidate_set as word_set')
+        candidate_set = word_set
     game_config = DEFAULT_GAME_CONFIG
     game_config['max_guesses'] = str(args.guesses)
+    game_config['candidate_set'] = candidate_set
+    game_config['guess_set'] = word_set
     solver_settings = DEFAULT_SOLVER_SETTINGS
     solver_settings['max_guesses'] = str(args.guesses)
     solver_settings['non_strict'] = not args.hard_mode
+    solver_settings['candidate_set'] = candidate_set
+    solver_settings['guess_set'] = word_set
     if args.mode == PLAY:
-        play(word_set, game_config=game_config)
+        play(game_config=game_config)
     elif args.mode == SHOW:
         if not args.word and not args.random:
             print(f'Error: Must provide word to solve with -w/--word or -r/--random.')
             sys.exit() 
-        words = args.word.split(',') if args.word else [random.choice(word_set)]
-        show(word_set, words, game_config=game_config, solver_settings=solver_settings, debug=args.debug)
+        words = args.word.split(',') if args.word else [random.choice(solver_settings['candidate_set'])]
+        show(words, game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == SOLVE:
-        solve(word_set, game_config=game_config, solver_settings=solver_settings, debug=args.debug)
+        solve(game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == EVAL:
+        if not args.eval_out_file:
+            print(f'Running eval. Specify --eval_out_file to write the details of the eval to a file.')
         if args.word:
             words = args.word.split(',')
         else:
             K = args.k
             if not args.k:
-                K = len(word_set)
-            words = random.sample(word_set, K)
-        eval(word_set, words, game_config=game_config, solver_settings=solver_settings)    
+                K = len(solver_settings['candidate_set'])
+            words = random.sample(solver_settings['candidate_set'], K)
+        eval(words, args.eval_out_file, game_config=game_config, solver_settings=solver_settings)    
 
 
 if __name__ == '__main__':

@@ -2,7 +2,8 @@
 DEFAULT_N = 5
 DEFAULT_MAX_GUESSES = 6
 DATA_DIR = 'data'
-DEFAULT_DICT = 'data/dictionary_proper.txt'
+DEFAULT_DICT = 'data/official_wordle_all.txt'
+DEFAULT_CAND_DICT = 'data/official_wordle_common.txt'
 
 # Game settings
 DEFAULT_GAME_CONFIG = {

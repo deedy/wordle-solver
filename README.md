@@ -2,16 +2,19 @@
 
 The most comprehensive, exhaustive, parameterized command-line *wordle* (https://www.powerlanguage.co.uk/wordle/) solver. Wordle is a really popular game made viral by it's inscrutable and quirky emoticon-based game description.
 
-The solver boasts a *99.35%+* accuracy on the 8636 valid 5-letter words. Features:
+The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*.
+
+Features:
  - Supports 4 modes: `play`, `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) and `eval` (evaluate the performance)
- - Deterministic
+ - Mostly deterministic (sometimes tie-breakers in sort functions change the results on different runs)
  - Highest accuracy of all solutions evaluated
- - Support custom dictionaries with `--dict_file`
+ - Support custom dictionaries with `--dict_file` and candidate files with `--cand_file` if different from the underlying dictionary.
  - Support custom length wordles with `-N` and custom max guesses with `--guesses`.
  - Supports "hard mode" where each guess must conform to previous hints with `--hard`.
  - Fully tested
  - Latency `~0.26s` per run on default ~9000 word dict and all 5 letter words.
-Current dictionary used is the valid [Scrabble dictionary](https://github.com/zeisler/scrabble). 
+Current dictionary used is the `--dict_file data/official_wordle_all.txt --cand_file data/official_wordle_common.txt`, which is the official Wordle setting.
+
 
 Solver’s attempt to solve the Jan 10, 2022 wordle for the word `query`:
 
@@ -32,8 +35,6 @@ With the settings for non-strict play, using positional
  - Find a word from all valid guesses which optimizes sum(P(letter at pos i)) + 0.5 * sum(P letter not at pos i)
  - Repeat 
 
-The 56 failure cases are `sakes`, `mooed`, `jived`, `wanes`, `jocks`, `minks`, `wades`, `jaded`, `zoner`, `joker`, `wived`, `jakes`, `mozos`, `goxes`, `vills`, `rover`, `zooks`, `cozes`, `jibes`, `wakes`, `hajes`, `joked`, `sinhs`, `zaxes`, `yaffs`, `hiker`, `bases`, `moved`, `bises`, `zills`, `hided`, `eaved`, `vined`, `surfs`, `jiber`, `gibed`, `dozer`, `fuzed`, `mixed`, `boxed`, `waxes`, `waves`, `vomer`, `egged`, `mazed`, `pests`, `hived`, `socks`, `fazes`, `vests`, `jibed`, `mewed`, `hazes`, `sooks`, `woods`, `sinks`
-For all these words, there are 2-5 candidate words left at the last guess, and with a random last guess, there is a probability of guessing these too.
 
 # Usage
 
@@ -151,12 +152,66 @@ Results of the evaluation and performance of the eval depend greatly on the choi
  - `data/five_letter_common.txt`: 2499 common 5-letter words. This is the same word list used in https://swag.github.io/evil-wordle/
  - `data/official_wordle_all.txt`: All 12972 official valid 5-letter words taken from the Wordle website source https://www.powerlanguage.co.uk/wordle/main.c1506a22.js
  - `data/official_wordle_common.txt`: The official 2315 "common" guessable 5-letter words taken from the Wordle website source https://www.powerlanguage.co.uk/wordle/main.c1506a22.js
+ - `data/past_wordles_200.txt`: The official 200 first wordle words. Not meant for use as a dictionary. 
 
 The official Wordle game uses a large lexicon for valid guess words, but a smaller subset for valid magic words. We ignore this assumption and assume any valid word can be guessed. 
 
 # Evaluation 
 
+### Official Wordle
+
+The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*. The distribution of number of attempts is:
+
+ - Two: 58 (2.5%)
+ - Three: 730 (31.5%)
+ - Four: 1196 (51.66%)
+ - Five: 313 (13.5%)
+ - Six: 18 (<1%)
+ 
+Note: I believe @npinsker's full Rust brute force solution shared on Twitter achieves a 3.47 average attempts, and starts with *SOARE*.
+
+
+On the first 200 real world Wordles, every word was solved with an average number of attempts of *3.85* with `jaunt` consistently taking 6 attempts. Here's a full solution to `jaunt` which takes 6 guesses:
+
+```
+Word [JAUNT]
+Choosing [soare]. Total 2315 candidates: ['femme', 'claim', 'wrung', 'suite', 'peach']...
+SOARE
+⬛⬛🟨⬛⬛
+Right: [_____] Wrong: [('a', {2})] Absent: [sreo]
+Choosing [canty]. Total 138 candidates: ['aunty', 'apply', 'vital', 'fauna', 'patty']...
+CANTY
+⬛🟩🟨🟨⬛
+Right: [_a___] Wrong: [('a', {2}), ('n', {2}), ('t', {3})] Absent: [recyos]
+Choosing [vaunt]. Total 10 candidates: ['faint', 'daunt', 'vaunt', 'paint', 'jaunt']...
+VAUNT
+⬛🟩🟩🟩🟩
+Right: [_aunt] Wrong: [('a', {2}), ('n', {2}), ('t', {3})] Absent: [recyovs]
+Choosing [dight]. Total 5 candidates: ['daunt', 'jaunt', 'gaunt', 'haunt', 'taunt']...
+DIGHT
+⬛⬛⬛⬛🟩
+Right: [_aunt] Wrong: [('a', {2}), ('n', {2}), ('t', {3})] Absent: [regcyiovsdh]
+Choosing [tajes]. Total 2 candidates: ['jaunt', 'taunt']...
+TAJES
+🟨🟩🟨⬛⬛
+Right: [_aunt] Wrong: [('a', {2}), ('n', {2}), ('t', {0, 3}), ('j', {2})] Absent: [regcyiovsdh]
+Choosing [jaunt]. Total 1 candidates: ['jaunt']...
+JAUNT
+🟩🟩🟩🟩🟩
+Solved! - [jaunt]
+Woohoo! Solver solved it in 6 guesses!
+```
+
+
+
+### On 8636 Scrabble Words list
+
 Using a dictionary of scrabble words, there are 172,819 total words and around 5% of them are exactly 5 letters long (8,636). The algorithm devised achieves a *99.35%* success rate at guessing the right word, failing to get the correct the answer for 56 words.
+
+The 56 failure cases are `sakes`, `mooed`, `jived`, `wanes`, `jocks`, `minks`, `wades`, `jaded`, `zoner`, `joker`, `wived`, `jakes`, `mozos`, `goxes`, `vills`, `rover`, `zooks`, `cozes`, `jibes`, `wakes`, `hajes`, `joked`, `sinhs`, `zaxes`, `yaffs`, `hiker`, `bases`, `moved`, `bises`, `zills`, `hided`, `eaved`, `vined`, `surfs`, `jiber`, `gibed`, `dozer`, `fuzed`, `mixed`, `boxed`, `waxes`, `waves`, `vomer`, `egged`, `mazed`, `pests`, `hived`, `socks`, `fazes`, `vests`, `jibed`, `mewed`, `hazes`, `sooks`, `woods`, `sinks`
+For all these words, there are 2-5 candidate words left at the last guess, and with a random last guess, there is a probability of guessing these too.
+
+The average number of attempts is around *4-4.1*, and the ideal starting word is *TARES*.
 
 Other settings achieved:
  - Global character frequency heuristic: Couldn't solve for 133 out of 1000 random samples (86.7% Success rate)
@@ -192,9 +247,8 @@ For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solut
 
 # Future Work
 
- - Support passing in more solver settings through command line, including the weight of `NON_POS_WEIGHT`
- - Support a separate guess set and valid word set
  - This solution does pretty well and generalizes to various dictionaries, but the optimal solution is to fully generate the mini-max tree for a given dictionary:
    - Demo: http://www.npinsker.me/puzzles/wordle/
    - Code (Rust): https://gist.github.com/npinsker/a495784b9c6eacfe481d8e38963b335c
    - Tweet: https://twitter.com/npinsker/status/1478981155529519104
+ - Expose into a web UI solver in a static UI.

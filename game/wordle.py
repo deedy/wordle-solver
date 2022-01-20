@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 from .constants import NOTHING, GUESS_WRONG_SPOT, GUESS_RIGHT_SPOT, DEFAULT_GAME_CONFIG
 from .util import get_n_from_word_set
 
@@ -13,12 +13,19 @@ class Wordle:
     SOLVED = 1
     UNSOLVED = 2
     
-    def __init__(self, word_set: List[str], word: str, config: Dict[str, str] = DEFAULT_GAME_CONFIG, verbose=True):
-        self.N = get_n_from_word_set(word_set)
-        self.MAX_GUESSES = int(config['max_guesses'])
-        self.all_words = set(word_set)
-        self.check_word(word)
+    def __init__(self, word: str, config: Dict[str, str] = DEFAULT_GAME_CONFIG, verbose=True):
         self._word = word.lower()
+        if not 'candidate_set' in config: 
+            raise Exception('candidate_set not specified in config')
+        self.candidate_set = set(config['candidate_set'])
+        self.N = get_n_from_word_set(config['candidate_set'])
+        self.MAX_GUESSES = int(config['max_guesses'])
+        self.check_word(self._word, self.candidate_set)
+
+        if not 'guess_set' in config: 
+            raise Exception('guess_set not specified in config')
+        self.guess_set = set(config['guess_set'])
+
         self.guesses = []
         self.state = Wordle.PLAYING
         self.verbose = verbose
@@ -31,10 +38,10 @@ class Wordle:
             pclue.append(Wordle.EMOJI_MAP[c]) 
         return ''.join(pclue)
 
-    def check_word(self, guess):
+    def check_word(self, guess: str, word_set: Set[str]):
         if len(guess) != self.N:
             raise Exception(f'[{guess}] needs to be {self.N} letters')
-        if not guess in self.all_words:
+        if not guess in word_set:
             raise Exception(f'[{guess}] is not a valid word!')
 
     
@@ -49,7 +56,7 @@ class Wordle:
                 print('Already lost!')
             return None, self.state
         guess = guess.lower()
-        self.check_word(guess)
+        self.check_word(guess, self.guess_set)
         self.guesses.append(guess)
         clue = [NOTHING] * self.N
         for i, g in enumerate(guess):
