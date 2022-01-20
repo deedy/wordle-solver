@@ -1,6 +1,6 @@
 # Wordle Solver
 
-The most comprehensive, exhaustive, parameterized command-line *wordle* (https://www.powerlanguage.co.uk/wordle/) solver. Wordle is a really popular game made viral by it's inscrutable and quirky emoticon-based game description.
+The most comprehensive, exhaustive, parameterized command-line *wordle* (https://www.powerlanguage.co.uk/wordle/) solver. Wordle is a really popular game made viral by it's inscrutable and quirky emoji-based game description.
 
 The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*.
 
@@ -30,10 +30,10 @@ Solver’s attempt to solve the Jan 10, 2022 wordle for the word `query`:
 # Algorithm
 
 With the settings for non-strict play, using positional
- - Find all candidates that fit the criteria
- - Amongst the valid candidates, compute a distribution of letters at each position
- - Find a word from all valid guesses which optimizes sum(P(letter at pos i)) + 0.5 * sum(P letter not at pos i)
- - Repeat 
+ - Find all candidates that fit the criteria.
+ - Amongst the valid candidates, compute a distribution of letters at each position.
+ - Find a guessable word from all valid guesses which optimizes sum(P(letter at pos i)) + 0.5 * sum(P letter not at pos i) amongst the candidate set. Break ties effectively.
+ - Repeat until there is only 1 candidate possible and guess it.
 
 
 # Usage
