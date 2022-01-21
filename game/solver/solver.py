@@ -42,6 +42,8 @@ def guess_next_word(
     candidates = solver_settings['candidate_set']
     if not 'guess_set' in solver_settings or not len(solver_settings['guess_set']): 
         word_set = solver_settings['candidate_set']
+    else:
+        word_set = solver_settings['guess_set']
 
     if 'solution_tree' in solver_settings and len(solver_settings['solution_tree']):
         base = solver_settings['solution_tree']
@@ -53,6 +55,8 @@ def guess_next_word(
                 raise Exception('No candidates left! Its possible you\'re not using an accurate solution tree for this configuration!')
             base = base[word][strclue]
         keys = list(base.keys())
+        if len(clues) and len(clues[-1][1])and len(set(clues[-1][1])) == 1 and clues[-1][1][0] == GUESS_RIGHT_SPOT:
+            return None, [], 0
         if not len(keys):
             raise Exception('No candidates left! Its possible you\'re not using an accurate solution tree for this configuration!')
         return keys[0], [keys[0]], 1
