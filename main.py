@@ -217,7 +217,7 @@ def main():
     elif args.mode == SOLVE:
         solve(game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == EVAL:
-        if not args.    :
+        if not args.eval_out_file:
             print(f'Running eval. Specify --eval_out_file to write the details of the eval to a file.')
         if args.word:
             words = args.word.split(',')
