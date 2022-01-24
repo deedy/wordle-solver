@@ -11,6 +11,7 @@ from typing import Dict, List
 
 
 PLAY = 'play'
+SAVE = 'save'
 SOLVE = 'solve'
 SHOW = 'show'
 EVAL = 'eval'
@@ -26,6 +27,45 @@ def play(game_config: Dict[str, str]):
             clue, _ = w.guess(guess)
         except Exception as e:
             print(f'Error: {str(e)}')
+
+def save(game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
+    N = get_n_from_word_set(solver_settings['guess_set'])
+    clues = []
+    guesses = 0
+    while guesses < int(game_config['max_guesses']):
+        chosen, cands, lencands = guess_next_word(clues, solver_settings=solver_settings, debug=debug)
+        if not chosen:
+            print(f'Solved! = {clues[-1][0]}')
+            sys.exit()
+        print(f'Solver recommends the word [{chosen.upper()}]. There are {lencands} possible words: {cands[:10]}...')
+        error = True 
+        while error:
+            guess = input('Guess? ')
+            if len(guess) != N:
+                print(f'Error: Guess must be {N} length.')
+                continue
+            try:
+                Wordle.check_word(N, guess.lower(), solver_settings['guess_set'])
+            except Exception as e:
+                print(f'Error: {str(e)}')
+                continue
+            error = False
+        feedback = input('How did it do (0=⬛, 1=🟨, 2=🟩) e.g. 00000 or ⬛⬛⬛⬛⬛? ')
+        feedback = feedback.strip()
+        if len(feedback) != N:
+            print(f'Error: Result must be {N} length.')
+            continue
+        if len(set(feedback + '012')) <= 3:
+            feedback_parsed = [ord(f) - ord('0') for f in feedback]
+        elif len(set(feedback + '⬛🟨🟩')) <= 3:
+            reverse_emoji_map = {v: k for k, v in Wordle.EMOJI_MAP.items()}
+            feedback_parsed = [reverse_emoji_map[f] for f in feedback]
+        else:
+            print(f'Error: Must only be 0, 1, or 2')
+            continue
+        guesses += 1
+        clues.append((guess, feedback_parsed)) 
+    print(f'Unsolved!')
 
 def show(words: List[str], game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int=0):
     for word in words:
@@ -107,7 +147,7 @@ def main():
     parser.add_argument('-m',
                         '--mode',
                         help='Run mode. Default none',
-                        choices=[PLAY, SHOW, SOLVE, EVAL, GEN_TREE],
+                        choices=[PLAY, SAVE, SHOW, SOLVE, EVAL, GEN_TREE],
                         default=None,
                         required=True)
     parser.add_argument('-w',
@@ -208,6 +248,8 @@ def main():
         solver_settings['solution_tree'] = pickle.load(open(args.tree_file, 'rb'))
     if args.mode == PLAY:
         play(game_config=game_config)
+    elif args.mode == SAVE:
+        save(game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == SHOW:
         if not args.word and not args.random:
             print(f'Error: Must provide word to solve with -w/--word or -r/--random.')

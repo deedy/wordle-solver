@@ -20,7 +20,7 @@ class Wordle:
         self.candidate_set = set(config['candidate_set'])
         self.N = get_n_from_word_set(config['candidate_set'])
         self.MAX_GUESSES = int(config['max_guesses'])
-        self.check_word(self._word, self.candidate_set)
+        Wordle.check_word(self.N, self._word, self.candidate_set)
 
         if not 'guess_set' in config or not len(config['guess_set']): 
             self.guess_set = set(config['candidate_set'])
@@ -39,8 +39,8 @@ class Wordle:
             pclue.append(Wordle.EMOJI_MAP[c]) 
         return ''.join(pclue)
 
-    def check_word(self, guess: str, word_set: Set[str]):
-        if len(guess) != self.N:
+    def check_word(N: int, guess: str, word_set: Set[str]):
+        if len(guess) != N:
             raise Exception(f'[{guess}] needs to be {self.N} letters')
         if not guess in word_set:
             raise Exception(f'[{guess}] is not a valid word!')
@@ -57,7 +57,7 @@ class Wordle:
                 print('Already lost!')
             return None, self.state
         guess = guess.lower()
-        self.check_word(guess, self.guess_set)
+        Wordle.check_word(self.N, guess, self.guess_set)
         self.guesses.append(guess)
         clue = [NOTHING] * self.N
         for i, g in enumerate(guess):

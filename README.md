@@ -5,7 +5,7 @@ The most comprehensive, exhaustive, parameterized command-line *wordle* (https:/
 The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*.
 
 Features:
- - Supports 4 modes: `play`, `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) and `eval` (evaluate the performance)
+ - Supports 5 modes: `play` (play Wordle against a CPU), `show` (to show a solution for a specific word), `solve` (to solve a puzzle online), `save` (to help you in the middle of a game you started) and `eval` (evaluate the performance)
  - Mostly deterministic (we arbitrarily select the chronologically lowest word in tie-breakers)
  - Highest accuracy of all solutions evaluated
  - Support custom dictionaries with `--dict_file` and candidate files with `--cand_file` if different from the underlying dictionary.
@@ -224,6 +224,20 @@ With `--gen_tree`, in ~30mins on the official Wordle data we can explore every s
  	- ⬛🟩⬛⬛⬛ 3.7%, or 87/2315 time, the next guess is `bludy`. Average attempts in this path: `4.11`
 
 
+### Past Wordles
+
+As of Jan 24, 2022, on the past 220 wordles, it solves all of them with an average attempts of `3.84`. The distribution of number of attempts is:
+
+ - Two: 1 (<1%)
+ - Three: 58 (26%)
+ - Four: 115 (52%)
+ - Five: 24 (11%)
+ - Six: 2 (<1%)
+
+
+The word list is available at `data/past_wordles_220.txt`.
+
+
 ### On 8636 Scrabble Words list
 
 Using a dictionary of scrabble words, there are 172,819 total words and around 5% of them are exactly 5 letters long (8,636). The algorithm devised achieves a *99.35%* success rate at guessing the right word, failing to get the correct the answer for 56 words.
@@ -276,6 +290,8 @@ For 6-letters, here's the 5-ply solution. In hard mode, I've found a 7-ply solut
 
 # Changelog
 
+ - 3.1 (Jan 20) "Save" mode
+  - Adds `-m save` which allows you to input your gameplay to any point and recommends the best word for you to salvage your game, as well as candidates remaining.
  - 3.0 (Jan 19) The "Official" 100% Wordle release
  	- Add official Wordle dicts, report 100% number on all official Wordle words.
  	- Support separate candidate and guess dictionaries (`--dict_file` and `--cand_file`) just like the official game.
