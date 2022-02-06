@@ -2,7 +2,7 @@
 
 The most comprehensive, exhaustive, parameterized command-line *wordle* (https://www.powerlanguage.co.uk/wordle/) solver. Wordle is a really popular game made viral by it's inscrutable and quirky emoji-based game description.
 
-The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.78*.
+The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.65*.
 
 Features:
  - Supports 5 modes: `play` (play Wordle against a CPU), `show` (to show a solution for a specific word), `solve` (to solve a puzzle online), `save` (to help you in the middle of a game you started) and `eval` (evaluate the performance)
@@ -161,60 +161,22 @@ The official Wordle game uses a large lexicon for valid guess words, but a small
 
 ### Official Wordle
 
-The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.77*. The distribution of number of attempts is:
+The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.65*. The distribution of number of attempts is:
 
- - Two: 58 (2.5%)
- - Three: 732 (31.5%)
- - Four: 1222 (52.5%)
- - Five: 284 (12.5%)
- - Six: 19 (<1%)
+ - Two: 67 (2.9%)
+ - Three: 914 (39.5%)
+ - Four: 1115 (48.2%)
+ - Five: 208 (9.0%)
+ - Six: 11 (<1%)
  
 Note: I believe @npinsker's full Rust brute force solution shared on Twitter achieves a 3.47 average attempts, and starts with *SOARE*.
 
 
-On the first 200 real world Wordles, every word was solved with an average number of attempts of *3.85* with `jaunt` consistently taking 6 attempts. The other words that took 6 attempts and their patterns are: 
- - The ?OLLY pattern: `golly,folly,jolly`
- - The ?A?ER pattern: `racer,wafer,baker,rarer,maker,waver`
- - The ?I?ER pattern: `riper,piper`
- - The ?IGHT pattern: `might,tight`
- - The ?AUNT pattern: `gaunt,jaunt`
- - The ?ATCH pattern: `hatch,watch`
- - The RE?EL pattern: `repel,rebel`
-
-Here's a full solution to `jaunt` which takes 6 guesses:
-
-```
-Word [JAUNT]
-Choosing [soare]. Total 2315 candidates: ['femme', 'claim', 'wrung', 'suite', 'peach']...
-SOARE
-⬛⬛🟨⬛⬛
-Right: [_____] Wrong: [('a', {2})] Absent: [sreo]
-Choosing [canty]. Total 138 candidates: ['aunty', 'apply', 'vital', 'fauna', 'patty']...
-CANTY
-⬛🟩🟨🟨⬛
-Right: [_a___] Wrong: [('a', {2}), ('n', {2}), ('t', {3})] Absent: [recyos]
-Choosing [vaunt]. Total 10 candidates: ['faint', 'daunt', 'vaunt', 'paint', 'jaunt']...
-VAUNT
-⬛🟩🟩🟩🟩
-Right: [_aunt] Wrong: [('a', {2}), ('n', {2}), ('t', {3})] Absent: [recyovs]
-Choosing [dight]. Total 5 candidates: ['daunt', 'jaunt', 'gaunt', 'haunt', 'taunt']...
-DIGHT
-⬛⬛⬛⬛🟩
-Right: [_aunt] Wrong: [('a', {2}), ('n', {2}), ('t', {3})] Absent: [regcyiovsdh]
-Choosing [tajes]. Total 2 candidates: ['jaunt', 'taunt']...
-TAJES
-🟨🟩🟨⬛⬛
-Right: [_aunt] Wrong: [('a', {2}), ('n', {2}), ('t', {0, 3}), ('j', {2})] Absent: [regcyiovsdh]
-Choosing [jaunt]. Total 1 candidates: ['jaunt']...
-JAUNT
-🟩🟩🟩🟩🟩
-Solved! - [jaunt]
-Woohoo! Solver solved it in 6 guesses!
-```
+On the first 220 real world Wordles, every word was solved with an average number of attempts of *3.69* with `jaunt` consistently taking 6 attempts. 
 
 With `--gen_tree`, in ~30mins on the official Wordle data we can explore every single avenue with which to play the game. Because the underlying solver is deterministic, this is essentially a cached version of the solver's solution given certain solver settings. We generated `tree/solution_tree.pickle` which is ~125KB and stores the moves to guess all 2315 possible words and support using these with `--tree_file`. This tree file can then be loaded up as a small drop-in replacement to solve Wordles online. Some statistics on the solution:
  - In every variant of the game, only `2,677` of total `12,972` guessable words were used (20.7% of words used).
- - The max dept of the tree is 6, for 19 nodes. The average depth is 3.78. 
+ - The max dept of the tree is 6, for 11 nodes. The average depth is 3.68. 
  - The starting node is `soare` after which there are 127 of the possible (3^5 = 243) valid clues Wordle can return. 
  - After `soare`, the most likely outcomes are:
  	- ⬛⬛⬛⬛⬛ 8%, or 183/2315 time, the next guess is `linty`. Average attempts in this path: `4.09`

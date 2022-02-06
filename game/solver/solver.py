@@ -79,7 +79,7 @@ def guess_next_word(
         raise Exception('No candidates left! Its possible you\'re not using an accurate dictionary!')
     guess_left = MAX_GUESSES - len(clues)
     # len(cands) <= guess_left (this condition guarantees brute force solving, but takes more attempts)
-    if len(cands) == 1 or guess_left == 1: 
+    if len(cands) == 1 or guess_left == 1 or (len(cands) == 2 and guess_left >= 2): 
         # We can just guess them all individually or don't have enough guesses left
         return cands[0], cands, len(cands)
 

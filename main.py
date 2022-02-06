@@ -212,9 +212,9 @@ def main():
                         required=False)
     args = parser.parse_args()
     N = args.N
-    if args.dict_file != DEFAULT_DICT:
-        print(f'Using the same candidates as dict_file: [{args.dict_file}]')
-        args.cand_file = args.dict_file
+    # if args.dict_file != DEFAULT_DICT:
+    #     print(f'Using the same candidates as dict_file: [{args.dict_file}]')
+    #     args.cand_file = args.dict_file
     try:
         word_set = read_words_of_length(N, fname=args.dict_file)
         if args.debug >= 1:
