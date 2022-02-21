@@ -21,7 +21,7 @@ class TestUtils(unittest.TestCase):
 		self.assertEqual(word_right_place, {}, "Guess word_right_place")
 
 
-	def test_guess_next_word(self):
+	def test_guess_next_word__avoid_duplicates(self):
 		clues = [('arose', [0, 0, 0, 0, 0])]
 		settings = DEFAULT_SOLVER_SETTINGS
 		settings['candidate_set'] = ['arose', 'unlit']
