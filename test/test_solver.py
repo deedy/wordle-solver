@@ -20,8 +20,22 @@ class TestUtils(unittest.TestCase):
 		self.assertEqual(in_word_wrong_place, {}, "Guess in_word_wrong_place")
 		self.assertEqual(word_right_place, {}, "Guess word_right_place")
 
+	def test_guess_next_word_no_options(self):
+		# Tests that a "no candidate" exception is raised if there's no suitable candidates
+		clues = [('arose', [0, 0, 0, 0, 0])]
+		settings = DEFAULT_SOLVER_SETTINGS
 
-	def test_guess_next_word__avoid_duplicates(self):
+		# Raise exception if no possible candidates
+		settings['candidate_set'] = []
+		with self.assertRaises(Exception) as context:
+			guess, cands, lencands = guess_next_word(clues, solver_settings=settings)
+
+		# Raise if possible candidates have already been used
+		settings['candidate_set'] = ['arose']
+		with self.assertRaises(Exception) as context:
+			guess, cands, lencands = guess_next_word(clues, solver_settings=settings)
+
+	def test_guess_next_word_avoid_duplicates(self):
 		clues = [('arose', [0, 0, 0, 0, 0])]
 		settings = DEFAULT_SOLVER_SETTINGS
 		settings['candidate_set'] = ['arose', 'unlit']
