@@ -1,7 +1,7 @@
 name: GitHub Actions Demo
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -9,4 +9,7 @@ jobs:
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - name: Run unit tests
         run: |
-          python3 -m unittest
+          make test
+      - name: Compute code coverage
+        run: |
+          make cover
