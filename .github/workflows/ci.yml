@@ -12,4 +12,5 @@ jobs:
           make test
       - name: Compute code coverage
         run: |
+          pip3 install coverage
           make cover
