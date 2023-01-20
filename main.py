@@ -3,16 +3,20 @@ from game.wordle import Wordle
 from game.constants import DEFAULT_N, DEFAULT_MAX_GUESSES, DEFAULT_GAME_CONFIG, DEFAULT_SOLVER_SETTINGS, DEFAULT_DICT, DEFAULT_CAND_DICT
 from game.solver.solver import guess_next_word, solve_wordle
 from game.util import get_n_from_word_set, read_words_of_length
+from game.vision.utils import get_bb, take_screenshot, show_color, get_code_from_line, write_word
 import argparse
 import random
 import sys
-from time import time
+import time
 from typing import Dict, List
+import cv2
+import pyautogui
 
 
 PLAY = 'play'
 SAVE = 'save'
 SOLVE = 'solve'
+SOLVE_VISION = 'solve_vision'
 SHOW = 'show'
 EVAL = 'eval'
 GEN_TREE = 'gen_tree'
@@ -111,6 +115,56 @@ def solve(game_config: Dict[str, str], solver_settings: Dict[str, str], debug: i
     print('Unsolved!')
 
 
+def solve_vision(game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int = 0):
+    if 'guess_set' not in solver_settings:
+        raise Exception('guess_set not specified in config')
+
+    N = get_n_from_word_set(solver_settings['guess_set'])
+    clues = []
+    guesses = 0
+    bb = get_bb()
+    i = 1
+    while guesses < int(game_config['max_guesses']):
+        chosen, cands, lencands = guess_next_word(clues, solver_settings=solver_settings, debug=debug)
+        if not chosen:
+            print(f'Solved! = {clues[-1][0]}')
+            sys.exit()
+        print(f'Try the word [{chosen.upper()}]. There are {lencands} possible words: {cands[:10]}...')
+        # change to game -> write word -> take screenshot -> get codes -> put here
+        print("PUT GAME ON MAIN SCREEN (3 seconds to run)")
+        time.sleep(1)
+        print("PUT GAME ON MAIN SCREEN (2 seconds to run)")
+        time.sleep(1)
+        print("PUT GAME ON MAIN SCREEN (1 seconds to run)")
+        time.sleep(1)
+        print("PUT GAME ON MAIN SCREEN (0 seconds to run)")
+
+        print("CHOSEN: ", chosen)
+        write_word(chosen)
+        time.sleep(2)
+        game_grid = take_screenshot(bb)
+
+        code = get_code_from_line(game_grid, i)
+        print('Code: ', code)
+        i += 1
+        feedback = code
+        feedback = feedback.strip()
+        if len(feedback) != N:
+            print(f'Error: Result must be {N} length.')
+            continue
+        if len(set(f'{feedback}012')) <= 3:
+            feedback_parsed = [ord(f) - ord('0') for f in feedback]
+        elif len(set(f'{feedback}⬛🟨🟩')) <= 3:
+            reverse_emoji_map = {v: k for k, v in Wordle.EMOJI_MAP.items()}
+            feedback_parsed = [reverse_emoji_map[f] for f in feedback]
+        else:
+            print('Error: Must only be 0, 1, or 2')
+            continue
+        guesses += 1
+        clues.append((chosen, feedback_parsed))
+    print('Unsolved!')
+
+
 def eval(words: List[str], out_file: str, game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int = 0):
     if 'candidate_set' not in solver_settings:
         raise Exception('candidate_set not specified in config')
@@ -157,7 +211,7 @@ def main():
     parser.add_argument('-m',
                         '--mode',
                         help='Run mode. Default none',
-                        choices=[PLAY, SAVE, SHOW, SOLVE, EVAL, GEN_TREE],
+                        choices=[PLAY, SAVE, SHOW, SOLVE, EVAL, GEN_TREE, SOLVE_VISION],
                         default=None,
                         required=True)
     parser.add_argument('-w',
@@ -264,6 +318,8 @@ def main():
         show(words, game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == SOLVE:
         solve(game_config=game_config, solver_settings=solver_settings, debug=args.debug)
+    elif args.mode == SOLVE_VISION:
+        solve_vision(game_config=game_config, solver_settings=solver_settings, debug=args.debug)
     elif args.mode == EVAL:
         if not args.eval_out_file:
             print(
