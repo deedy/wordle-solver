@@ -131,13 +131,15 @@ def solve_vision(game_config: Dict[str, str], solver_settings: Dict[str, str], d
             sys.exit()
         print(f'Try the word [{chosen.upper()}]. There are {lencands} possible words: {cands[:10]}...')
         # change to game -> write word -> take screenshot -> get codes -> put here
-        print("PUT GAME ON MAIN SCREEN (3 seconds to run)")
-        time.sleep(1)
-        print("PUT GAME ON MAIN SCREEN (2 seconds to run)")
-        time.sleep(1)
-        print("PUT GAME ON MAIN SCREEN (1 seconds to run)")
-        time.sleep(1)
-        print("PUT GAME ON MAIN SCREEN (0 seconds to run)")
+
+        if i == 1:
+            print("PUT GAME ON MAIN SCREEN (3 seconds to run)")
+            time.sleep(1)
+            print("PUT GAME ON MAIN SCREEN (2 seconds to run)")
+            time.sleep(1)
+            print("PUT GAME ON MAIN SCREEN (1 seconds to run)")
+            time.sleep(1)
+            print("PUT GAME ON MAIN SCREEN (0 seconds to run)")
 
         print("CHOSEN: ", chosen)
         write_word(chosen)
