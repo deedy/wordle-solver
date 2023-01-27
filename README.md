@@ -5,7 +5,7 @@ The most comprehensive, exhaustive, parameterized command-line *wordle* (https:/
 The official Wordle game can have *2,315* candidate hidden words and *12,972* valid guessable words. The solver boasts a *100%* accuracy on all candidates. The optimal first guess is *SOARE* and the average number of attempts to a solution is *3.65*.
 
 Features:
- - Supports 5 modes: `play` (play Wordle against a CPU), `show` (to show a solution for a specific word), `solve` (to solve a puzzle online), `save` (to help you in the middle of a game you started) and `eval` (evaluate the performance)
+ - Supports 5 modes: `play` (play Wordle against a CPU), `show` (to show a solution for a specific word), `solve` (to solve a puzzle online) or `solve_vision` (for auto-solving using OpenCV), `save` (to help you in the middle of a game you started) and `eval` (evaluate the performance)
  - Mostly deterministic (we arbitrarily select the chronologically lowest word in tie-breakers)
  - Highest accuracy of all solutions evaluated
  - Support custom dictionaries with `--dict_file` and candidate files with `--cand_file` if different from the underlying dictionary.
