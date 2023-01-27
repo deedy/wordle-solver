@@ -87,7 +87,7 @@ def show(words: List[str], game_config: Dict[str, str], solver_settings: Dict[st
 
 def solve(game_config: Dict[str, str], solver_settings: Dict[str, str], debug: int = 0):
     if 'guess_set' not in solver_settings:
-        raise Exception('guess_set not specified in config')
+        raise ValueError('guess_set not specified in config')
     N = get_n_from_word_set(solver_settings['guess_set'])
     clues = []
     guesses = 0
